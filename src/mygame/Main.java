@@ -166,7 +166,7 @@ public strictfp class Main extends SimpleApplication {
     
     @Override
     public void simpleUpdate(float tpf) {
-        
+        /*
         sum += tpf / 5.;
         GeneticIK.ABSTAND = sum;
         g.setStartRotation();
@@ -175,7 +175,7 @@ public strictfp class Main extends SimpleApplication {
         robot.robotNode.setLocalTranslation(0, 0,sum);
         
         //robot.robotNode.move(tpf / 5f, 0, 0);
-        
+        */
         
         
         /*if (finished) {

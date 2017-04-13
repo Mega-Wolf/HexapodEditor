@@ -173,10 +173,13 @@ public strictfp class Robot {
 
     public void updateRotations() {
         for (int i = 0; i < DNA.LEGS; i++) {
+            
+            // [0, 360)
             //nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i] / 180f * FastMath.PI, 0}));
             //nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i] / 180f * FastMath.PI, 0, 0}));
             //nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i] / 180f * FastMath.PI, 0, 0}));
-
+            
+            // [0, 2 * PI)
             nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i], 0}));
             nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i], 0, 0}));
             nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i], 0, 0}));
@@ -222,17 +225,18 @@ public strictfp class Robot {
     public void setRotation(GeneticIK g, double t) {
         
         //sphereSpecial.setLocalTranslation((float)GeneticIK.posAim.x + FastMath.sin(2/3f * FastMath.PI), (float)GeneticIK.posAim.y, (float)GeneticIK.posAim.z + FastMath.cos(2/3f * FastMath.PI));
-        sphereSpecial.setLocalTranslation((float)GeneticIK.posAim.x, (float)GeneticIK.posAim.y, (float)GeneticIK.posAim.z + 1);
+        sphereSpecial.setLocalTranslation((float)GeneticIK.posAimDebug.x, (float)GeneticIK.posAimDebug.y, (float)GeneticIK.posAimDebug.z + 1);
         
         
+        //TODO
+        g.setRotation(t);
         
-        
-        for (int c = 0; c < DNA.CHROMOSOMES; c++) {
+        for (int c = 0; c < DNA.LEGS; c++) {
             horizontalAngles[c] = (float) g.rotHorizontal[c];
             upAngles[c] = (float) g.rotTop[c];
             downAngles[c] = (float) g.rotBottom[c];
             
-            //TODO
+            
             
             /*
             horizontalAngles[c] = (float) (gr.chromosomes[c][A_HORIZONTAL] + gr.chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_HORIZONTAL]));
