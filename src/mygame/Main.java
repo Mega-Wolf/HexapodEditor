@@ -153,11 +153,19 @@ public strictfp class Main extends SimpleApplication {
         robot = new Robot((SimpleApplication) this);
         rootNode.attachChild(robot.robotNode);
         //testGA();
-        //GeneticIK.ABSTAND = 1.5;
-        g = new GeneticIK(new double[][] {{0,-1,3},{0,-1,3},{0,-1,3}});
+        g = new GeneticIK(new double[][] {
+            {0,-1,3},
+            {0,-1,3},
+            {0,-1,3},
+            {0,-1,3},
+            {0,-1,3},
+            {0,-1,3},
+            {0,0,3},
+            {0,0,0}
+        });
         
-        g.setStartRotation();
-        robot.setRotation(g, 0);
+        //g.setStartRotation();
+        robot.setRotation(g, 0.4999);
         
     }
 
@@ -166,16 +174,14 @@ public strictfp class Main extends SimpleApplication {
     
     @Override
     public void simpleUpdate(float tpf) {
-        /*
+        
         sum += tpf / 5.;
-        GeneticIK.ABSTAND = sum;
-        g.setStartRotation();
-        robot.setRotation(g,0);
+        robot.setRotation(g,sum % 1.);
         //robot.robotNode.setLocalTranslation(sum, -sum / 2, -sum / 3);
-        robot.robotNode.setLocalTranslation(0, 0,sum);
+        robot.robotNode.setLocalTranslation(0, 0, sum * 3);
         
         //robot.robotNode.move(tpf / 5f, 0, 0);
-        */
+        
         
         
         /*if (finished) {

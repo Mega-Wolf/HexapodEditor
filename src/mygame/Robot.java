@@ -74,19 +74,24 @@ public strictfp class Robot {
         Sphere sphereG = new Sphere(16, 16, 0.2f);
         Geometry sphere = new Geometry("Sphere", sphereG);
 
+        body.rotate(0, 30 / 180f * FastMath.PI,0);
+        
         for (int i = 0; i < 6; i++) {
             nodeSolid[i] = new Node();
             robotNode.attachChild(nodeSolid[i]);
+            
             jointSolid[i] = sphere.clone();
             nodeSolid[i].attachChild(jointSolid[i]);
 
-            nodeSolid[i].rotate(0, i * 60 / 180f * FastMath.PI, 0);
+            nodeSolid[i].rotate(0, (i * 60 + 30) / 180f * FastMath.PI, 0);
             jointSolid[i].setLocalTranslation(0, 0, 1);
         }
         
-        robotNode.detachChild(nodeSolid[3]);
-        robotNode.detachChild(nodeSolid[4]);
-        robotNode.detachChild(nodeSolid[5]);
+        //robotNode.detachChild(nodeSolid[1]);
+        //robotNode.detachChild(nodeSolid[2]);
+        //robotNode.detachChild(nodeSolid[3]);
+        //robotNode.detachChild(nodeSolid[4]);
+        //robotNode.detachChild(nodeSolid[5]);
         
         
         Geometry gHorHex = Hexagon.create3DHexagon(0.15f, 0.5f);
@@ -164,7 +169,9 @@ public strictfp class Robot {
         sphereSpecial = sphere.clone(false);
         sphereSpecial.setMaterial(matSpecial);
         
-        nodeSolid[2].attachChild(sphereSpecial);
+        robotNode.attachChild(sphereSpecial);
+        
+        sphereSpecial.setLocalTranslation(0, 0, 1);
         
         updateRotations();
 
@@ -225,7 +232,7 @@ public strictfp class Robot {
     public void setRotation(GeneticIK g, double t) {
         
         //sphereSpecial.setLocalTranslation((float)GeneticIK.posAim.x + FastMath.sin(2/3f * FastMath.PI), (float)GeneticIK.posAim.y, (float)GeneticIK.posAim.z + FastMath.cos(2/3f * FastMath.PI));
-        sphereSpecial.setLocalTranslation((float)GeneticIK.posAimDebug.x, (float)GeneticIK.posAimDebug.y, (float)GeneticIK.posAimDebug.z + 1);
+        //sphereSpecial.setLocalTranslation((float)GeneticIK.posAimDebug.x, (float)GeneticIK.posAimDebug.y, (float)GeneticIK.posAimDebug.z + 1);
         
         
         //TODO

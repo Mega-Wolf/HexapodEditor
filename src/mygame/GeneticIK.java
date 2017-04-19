@@ -5,16 +5,6 @@
  */
 package mygame;
 
-import static mygame.GeneticRobot.A_BOTTOM;
-import static mygame.GeneticRobot.A_HORIZONTAL;
-import static mygame.GeneticRobot.A_TOP;
-import static mygame.GeneticRobot.B_BOTTOM;
-import static mygame.GeneticRobot.B_HORIZONTAL;
-import static mygame.GeneticRobot.B_TOP;
-import static mygame.GeneticRobot.PHI_BOTTOM;
-import static mygame.GeneticRobot.PHI_HORIZONTAL;
-import static mygame.GeneticRobot.PHI_TOP;
-
 /**
  *
  * @author Tobias
@@ -38,24 +28,23 @@ public class GeneticIK {
     public static final double BOTTOM_MAX = 170 / 180. * Math.PI;
     public static final double BOTTOM_MIN = 25 / 180. * Math.PI;
 
-    public static final int CHROMOSOMES = 3;
-    public static final int EXTRA_CHROMOSOME_END = 5;
-
     public static final int G_X = 0;
     public static final int G_Y = 1;
     public static final int G_Z = 2;
 
     public static final int GENES = 3;
 
-    public static final int C_TRANSLATION = 3;
-    public static final int C_ROTATION = 4;
+    public static final int C_TRANSLATION = 6;
+    public static final int C_ROTATION = 7;
+    
+    public static final int CHROMOSOMES = 8;
 
     /* Variables */
     Vector3d posSolid[] = new Vector3d[LEGS];
     Vector3d posHorizontal[] = new Vector3d[LEGS];
     Vector3d posTop[] = new Vector3d[LEGS];
     Vector3d posBottom[] = new Vector3d[LEGS];
-    double[][] chromosomes = new double[EXTRA_CHROMOSOME_END][GENES];
+    double[][] chromosomes = new double[CHROMOSOMES][GENES];
 
     double rotHorizontal[] = new double[LEGS];
     double rotTop[] = new double[LEGS];
@@ -75,7 +64,7 @@ public class GeneticIK {
     }
 
     public GeneticIK(GeneticIK g0, GeneticIK g1) {
-        for (int i = 0; i < EXTRA_CHROMOSOME_END; i++) {
+        for (int i = 0; i < CHROMOSOMES; i++) {
             System.arraycopy(Math.random() < 0.5 ? g0.chromosomes[i] : g1.chromosomes[i], 0, chromosomes[i], 0, GENES);
         }
         mutate();
@@ -151,38 +140,53 @@ public class GeneticIK {
     }
 
     private void setDistance(double t) {
-        posDiff = new Vector3d(-chromosomes[C_TRANSLATION][G_X] / t, -chromosomes[C_TRANSLATION][G_Y] / t, -chromosomes[C_TRANSLATION][G_Z] / t);
+        posDiff = new Vector3d(-chromosomes[C_TRANSLATION][G_X] * t, -chromosomes[C_TRANSLATION][G_Y] * t, -chromosomes[C_TRANSLATION][G_Z] * t);
     }
 
-    private void setRotation2(double t) {
+    public void setRotation(double t) {
+        
+
         if (t < 0.5) {
-            inverseKinematics(0, t);
-            inverseKinematics(2, t);
-            inverseKinematics(4, t);
+            setDistance(t);
+            inverseKinematics(0);
+            inverseKinematics(2);
+            inverseKinematics(4);
+            
+            setDistance(-t);
             moveBack(1, t);
             moveBack(3, t);
             moveBack(5, t);
         } else {
-            inverseKinematics(1, t);
-            inverseKinematics(3, t);
-            inverseKinematics(5, t);
-            moveBack(0, t);
-            moveBack(2, t);
-            moveBack(4, t);
+            setDistance(1 - t);
+            moveBack(0, t - 0.5);
+            moveBack(2, t - 0.5);
+            moveBack(4, t - 0.5);
+            
+            setDistance(-1 + t);
+            inverseKinematics(1);
+            inverseKinematics(3);
+            inverseKinematics(5);
+            
+            
+            //inverseKinematics(0, t);
+            //inverseKinematics(2, t);
+            //inverseKinematics(4, t);
         }
     }
 
-    private void inverseKinematics(int leg, double t) {
-        int c = leg < 3 ? leg : LEGS - leg - 1;
-        int mirrorFactor = leg < 3 ? 1 : -1;
-        Vector3d posAim = new Vector3d(mirrorFactor * chromosomes[c][G_X], chromosomes[c][G_Y], chromosomes[c][G_Z]);
+    private void inverseKinematics(int leg) {
+        Vector3d posAim = new Vector3d(chromosomes[leg][G_X], chromosomes[leg][G_Y], chromosomes[leg][G_Z]);
 
-        double sinA = Math.sin(-c * 60 / 180. * Math.PI);
-        double cosA = Math.cos(-c * 60 / 180. * Math.PI);
+        double sinA = Math.sin(-(leg * 60 + 30) / 180. * Math.PI);
+        double cosA = Math.cos(-(leg * 60 + 30) / 180. * Math.PI);
 
         posAim.addLocal(cosA * posDiff.x + sinA * posDiff.z, posDiff.y, -sinA * posDiff.x + cosA * posDiff.z);
         GeneticIK.posAimDebug = posAim;
-
+        
+        inverseKinematics(leg, posAim);
+    }
+    
+    private void inverseKinematics(int leg, Vector3d posAim) {
         //Richtung des Mittelgelenks anpassen
         if (posAim.z == 0) {
             rotHorizontal[leg] = 0;
@@ -213,7 +217,7 @@ public class GeneticIK {
         double sinC = Math.sin(rotTop[leg]);
         double cosC = Math.cos(rotTop[leg]);
 
-        posHorizontal[c] = new Vector3d(L2 * (cosB * sinC + sinB * cosC) + L1 * sinB, 0, L2 * (cosB * cosC - sinB * sinC) + L1 * cosB);
+        posHorizontal[leg] = new Vector3d(L2 * (cosB * sinC + sinB * cosC) + L1 * sinB, 0, L2 * (cosB * cosC - sinB * sinC) + L1 * cosB);
 
         double angleTop = Math.acos((distSquared - L2 * L2 - L3 * L3) / (-2 * L2 * L3));
 
@@ -223,46 +227,15 @@ public class GeneticIK {
     }
 
     private void moveBack(int leg, double t) {
+        Vector3d posAim = new Vector3d(chromosomes[leg][G_X], chromosomes[leg][G_Y], chromosomes[leg][G_Z]);
 
-    }
+        double sinA = Math.sin(-(leg * 60 + 30) / 180. * Math.PI);
+        double cosA = Math.cos(-(leg * 60 + 30) / 180. * Math.PI);
 
-    public void setRotation(double t) {
-        for (int c = 0; c < CHROMOSOMES; c++) {
-            double sinA = Math.sin(c * 60 / 180. * Math.PI);
-            double cosA = Math.cos(c * 60 / 180. * Math.PI);
-
-            double sinB = Math.sin(chromosomes[c][A_HORIZONTAL] + chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_HORIZONTAL]));
-            double cosB = Math.cos(chromosomes[c][A_HORIZONTAL] + chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_HORIZONTAL]));
-
-            double sinC = Math.sin(chromosomes[c][A_TOP] + chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_TOP]));
-            double cosC = Math.cos(chromosomes[c][A_TOP] + chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_TOP]));
-
-            double sinD = Math.sin(chromosomes[c][A_BOTTOM] + chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_BOTTOM]));
-            double cosD = Math.cos(chromosomes[c][A_BOTTOM] + chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_BOTTOM]));
-
-            posSolid[c] = new Vector3d(A * sinA, 0, A * cosA);
-            posHorizontal[c] = new Vector3d(L1 * (cosA * sinB + sinA * cosB) + A * sinA, 0, L1 * (cosA * cosB - sinA * sinB) + A * cosA);
-            posTop[c] = new Vector3d((cosA * sinB + sinA * cosB) * cosC * L2 + posHorizontal[c].x, -sinC * L2, (cosA * cosB - sinA * sinB) * cosC * L2 + posHorizontal[c].z);
-            posBottom[c] = new Vector3d((-(cosA * sinB + sinA * cosB) * sinC * sinD + (cosA * sinB + sinA * cosB) * cosC * cosD) * L3 + posTop[c].x, (-cosC * sinD - sinC * cosD) * L3 - sinC * L2, (-(cosA * cosB - sinA * sinB) * sinC * sinD + (cosA * cosB - sinA * sinB) * cosC * cosD) * L3 + posTop[c].z);
-
-            // other legs
-            sinA = Math.sin((LEGS - 1 - c) * 60 / 180. * Math.PI);
-            cosA = Math.cos((LEGS - 1 - c) * 60 / 180. * Math.PI);
-
-            sinB = Math.sin(-chromosomes[c][A_HORIZONTAL] + chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_HORIZONTAL]));
-            cosB = Math.cos(-chromosomes[c][A_HORIZONTAL] + chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_HORIZONTAL]));
-
-            sinC = Math.sin(chromosomes[c][A_TOP] - chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_TOP]));
-            cosC = Math.cos(chromosomes[c][A_TOP] - chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_TOP]));
-
-            sinD = Math.sin(chromosomes[c][A_BOTTOM] - chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_BOTTOM]));
-            cosD = Math.cos(chromosomes[c][A_BOTTOM] - chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + chromosomes[c][PHI_BOTTOM]));
-
-            posSolid[LEGS - 1 - c] = new Vector3d(A * sinA, 0, A * cosA);
-            posHorizontal[LEGS - 1 - c] = new Vector3d(L1 * (cosA * sinB + sinA * cosB) + A * sinA, 0, L1 * (cosA * cosB - sinA * sinB) + A * cosA);
-            posTop[LEGS - 1 - c] = new Vector3d((cosA * sinB + sinA * cosB) * cosC * L2 + posHorizontal[LEGS - 1 - c].x, -sinC * L2, (cosA * cosB - sinA * sinB) * cosC * L2 + posHorizontal[LEGS - 1 - c].z);
-            posBottom[LEGS - 1 - c] = new Vector3d((-(cosA * sinB + sinA * cosB) * sinC * sinD + (cosA * sinB + sinA * cosB) * cosC * cosD) * L3 + posTop[LEGS - 1 - c].x, (-cosC * sinD - sinC * cosD) * L3 - sinC * L2, (-(cosA * cosB - sinA * sinB) * sinC * sinD + (cosA * cosB - sinA * sinB) * cosC * cosD) * L3 + posTop[LEGS - 1 - c].z);
-        }
+        posAim.addLocal(cosA * posDiff.x + sinA * posDiff.z, posDiff.y + 0.5 * Math.sin(t * 2 * Math.PI), -sinA * posDiff.x + cosA * posDiff.z);
+        GeneticIK.posAimDebug = posAim;
+        
+        inverseKinematics(leg, posAim);
     }
 
     /* Fitness Methods */
