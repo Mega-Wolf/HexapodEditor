@@ -1,12 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mygame;
 
 /**
- *
+ * A robot which can loop animations with Inverse Kinematics,
+ * the end state must be the beginning state
  * @author Tobias
  */
 public class GeneticIK {
@@ -53,16 +49,31 @@ public class GeneticIK {
     double fitness;
 
     Vector3d posDiff;
+    Vector3d rotDiff;
+    Vector3d rotStart;
 
     /* Constructor */
     public GeneticIK() {
         //TODO; init stuff
     }
 
+    /**
+     * Constructor for loading already existing walking gaits.
+     * Use this for in-game usage
+     * Rotates automatically, if y values are different
+     * @param chromosomes 
+     *      chromosomes 0..5: 3 doubles for x,y,z per leg
+     *      chromsome 6: 2 doubles for x,z for overall translation
+     */
     public GeneticIK(double[][] chromosomes) {
         this.chromosomes = chromosomes;
     }
 
+    /**
+     * Constructor for genetical usage. Takes to parents and lets mutation and crossover determine the child
+     * @param g0 Parent 1
+     * @param g1 Parent 2
+     */
     public GeneticIK(GeneticIK g0, GeneticIK g1) {
         for (int i = 0; i < CHROMOSOMES; i++) {
             System.arraycopy(Math.random() < 0.5 ? g0.chromosomes[i] : g1.chromosomes[i], 0, chromosomes[i], 0, GENES);
@@ -71,81 +82,22 @@ public class GeneticIK {
     }
 
     /* Methods */
+    /**
+     * Mutates the values of the robot
+     */
     private void mutate() {
         //TODO
     }
-
-    /*
-        Notizen:
-        - Wie bewegt sich Roboter überhaupt?
-            - Translation
-            - Rotation
-        - Wie erkennt der Roboter, dass er sich so bewegt?
-        
-        Beobachtung:
-        - Punkt genau unter dem HJoint nicht genau definiert
-            - Festlegen auf 0° horizontal?
+    
+    /**
+     * Sets the translation for the given time
+     * @param t time
      */
-    public static Vector3d posAimDebug;
-
-    public boolean setStartRotation() {
-        for (int c = 0; c < CHROMOSOMES; c++) {
-            Vector3d posAim = new Vector3d(chromosomes[c][G_X], chromosomes[c][G_Y], chromosomes[c][G_Z]);
-
-            double sinA = Math.sin(-c * 60 / 180. * Math.PI);
-            double cosA = Math.cos(-c * 60 / 180. * Math.PI);
-
-            //Vector3d diff = new Vector3d(0,0, -ABSTAND);
-            //posAim.addLocal(cosA * diff.x + sinA * diff.z, diff.y, - sinA * diff.x + cosA * diff.z);
-            GeneticIK.posAimDebug = posAim;
-
-            //Richtung des Mittelgelenks anpassen
-            if (posAim.z == 0) {
-                rotHorizontal[c] = 0;
-            } else {
-                rotHorizontal[c] = Math.atan(posAim.x / posAim.z);
-            }
-
-            double sinB = Math.sin(rotHorizontal[c]);
-            double cosB = Math.cos(rotHorizontal[c]);
-
-            Vector3d dummy = new Vector3d(L1 * sinB, 0, L1 * cosB);
-
-            //Beine anpassen
-            double distSquared = dummy.distanceSquared(posAim);
-            double dist = Math.sqrt(distSquared);
-
-            double angleBody = Math.acos((L3 * L3 - distSquared - L2 * L2) / (-2 * dist * L2));
-
-            if (angleBody == Double.NaN) {
-                return false;
-            }
-
-            double downAngle = Math.asin((posAim.y - dummy.y) / (dist));
-
-            rotTop[c] = 2 * Math.PI - (angleBody + downAngle);
-
-            double sinC = Math.sin(rotTop[c]);
-            double cosC = Math.cos(rotTop[c]);
-
-            posHorizontal[c] = new Vector3d(L2 * (cosB * sinC + sinB * cosC) + L1 * sinB, 0, L2 * (cosB * cosC - sinB * sinC) + L1 * cosB);
-
-            double angleTop = Math.acos((distSquared - L2 * L2 - L3 * L3) / (-2 * L2 * L3));
-
-            //System.out.println(angleBody * 180 / Math.PI);
-            //System.out.println(downAngle * 180 / Math.PI);
-            rotBottom[c] = Math.PI - angleTop;
-        }
-        return true;
-    }
-
     private void setDistance(double t) {
         posDiff = new Vector3d(-chromosomes[C_TRANSLATION][G_X] * t, -chromosomes[C_TRANSLATION][G_Y] * t, -chromosomes[C_TRANSLATION][G_Z] * t);
     }
-
+    
     public void setRotation(double t) {
-        
-
         if (t < 0.5) {
             setDistance(t);
             inverseKinematics(0);
@@ -166,11 +118,6 @@ public class GeneticIK {
             inverseKinematics(1);
             inverseKinematics(3);
             inverseKinematics(5);
-            
-            
-            //inverseKinematics(0, t);
-            //inverseKinematics(2, t);
-            //inverseKinematics(4, t);
         }
     }
 
@@ -181,7 +128,6 @@ public class GeneticIK {
         double cosA = Math.cos(-(leg * 60 + 30) / 180. * Math.PI);
 
         posAim.addLocal(cosA * posDiff.x + sinA * posDiff.z, posDiff.y, -sinA * posDiff.x + cosA * posDiff.z);
-        GeneticIK.posAimDebug = posAim;
         
         inverseKinematics(leg, posAim);
     }
@@ -232,8 +178,8 @@ public class GeneticIK {
         double sinA = Math.sin(-(leg * 60 + 30) / 180. * Math.PI);
         double cosA = Math.cos(-(leg * 60 + 30) / 180. * Math.PI);
 
-        posAim.addLocal(cosA * posDiff.x + sinA * posDiff.z, posDiff.y + 0.5 * Math.sin(t * 2 * Math.PI), -sinA * posDiff.x + cosA * posDiff.z);
-        GeneticIK.posAimDebug = posAim;
+        //TODO, set the sin-y according to speed; slower = less factor; therefore you need less space if you are crawling
+        posAim.addLocal(cosA * posDiff.x + sinA * posDiff.z, posDiff.y + 0.5 * Math.sin(t * 2 * Math.PI) , -sinA * posDiff.x + cosA * posDiff.z);
         
         inverseKinematics(leg, posAim);
     }
