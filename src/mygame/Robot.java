@@ -20,7 +20,7 @@ import com.jme3.scene.shape.Sphere;
  *
  * @author Tobias
  */
-public strictfp class Robot {
+public class Robot {
 
     SimpleApplication app;
 
@@ -191,6 +191,13 @@ public strictfp class Robot {
             nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i], 0, 0}));
             nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i], 0, 0}));
         }
+        
+        
+        System.out.println("Important");
+        System.out.println(horizontalAngles[5]);
+        System.out.println(upAngles[5]);
+        System.out.println(downAngles[5]);
+        
     }
 
     //Geometry centerGeometry;
@@ -229,15 +236,16 @@ public strictfp class Robot {
 
     int naturalMutation;
 
-    public void setRotation(GeneticIK g, double t) {
+    public void setRotation(TripodLoopRobot g, double t) {
         
         //sphereSpecial.setLocalTranslation((float)GeneticIK.posAim.x + FastMath.sin(2/3f * FastMath.PI), (float)GeneticIK.posAim.y, (float)GeneticIK.posAim.z + FastMath.cos(2/3f * FastMath.PI));
-        //sphereSpecial.setLocalTranslation((float)GeneticIK.posAimDebug.x, (float)GeneticIK.posAimDebug.y, (float)GeneticIK.posAimDebug.z + 1);
+        
         
         
         //TODO
         g.setRotation(t);
-        
+        //sphereSpecial.setLocalTranslation((float)TripodLoopRobot.posAimDebug.x, (float)TripodLoopRobot.posAimDebug.y, (float)TripodLoopRobot.posAimDebug.z);
+        //sphereSpecial.rotate(FastMath.PI / -4, 0, 0);
         for (int c = 0; c < DNA.LEGS; c++) {
             horizontalAngles[c] = (float) g.rotHorizontal[c];
             upAngles[c] = (float) g.rotTop[c];

@@ -5,6 +5,7 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Quad;
@@ -18,7 +19,7 @@ import test.Stick;
  *
  * @author normenhansen
  */
-public strictfp class Main extends SimpleApplication {
+public class Main extends SimpleApplication {
 
     boolean finished;
     GeneticRobot finishedGR;
@@ -153,30 +154,35 @@ public strictfp class Main extends SimpleApplication {
         robot = new Robot((SimpleApplication) this);
         rootNode.attachChild(robot.robotNode);
         //testGA();
-        g = new GeneticIK(new double[][] {
-            {0,0,3},
-            {0,-1,3},
-            {0,-1,3},
-            {0,-1,3},
-            {0,-1,3},
-            {0,-0.5,3},
-            //{0,0.5,3},
-            //{0,0,3},
-            {0,0,3},
-            {0,0,0}
+        
+        
+        double x = Math.PI / 4;
+        double y = Math.PI / 6;
+        
+        g = new TripodLoopRobot(new double[][] {
+            {0,3},
+            {0,3},
+            {0,3},
+            {0,3},
+            {0,3},
+            {0,3},
+            {1},
+            {x,y},
+            {0,3}
         });
+        robot.setRotation(g, 0);
+        robot.robotNode.rotateUpTo(new Vector3f((float) (Math.sin(-y) * Math.sin(x)) , (float) Math.cos(x), (float) (Math.cos(-y) * Math.sin(x)) ));
         
-        //g.setStartRotation();
-        //robot.setRotation(g, 0.4999);
-        
+        System.out.println(robot.jointSolid[4].getWorldTranslation());
     }
-
+    
+    
     float sum = 0;
-    GeneticIK g;
+    TripodLoopRobot g;
     
     @Override
     public void simpleUpdate(float tpf) {
-        
+        /*
         sum += tpf / 5.;
         robot.setRotation(g,sum % 1.);
         //robot.robotNode.setLocalTranslation(sum, -sum / 2, -sum / 3);
@@ -184,6 +190,7 @@ public strictfp class Main extends SimpleApplication {
         robot.robotNode.setLocalTranslation(0, 0, sum * 3);
         //robot.robotNode.setLocalTranslation(0, (sum % 1) * 0.5f, 0);
         
+        */
         /*
         if (sum >= 1) {
             System.exit(0);
