@@ -1,8 +1,6 @@
 package mygame;
 
 import com.jme3.export.*;
-import com.jme3.math.FastMath;
-import com.jme3.math.Vector3f;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -824,7 +822,7 @@ public final class Vector3d implements Savable, Cloneable, java.io.Serializable 
 
         if (Math.abs(w.x) >= Math.abs(w.y)) {
             // w.x or w.z is the largest magnitude component, swap them
-            fInvLength = FastMath.invSqrt((float) (w.x * w.x + w.z * w.z));
+            fInvLength = 1.0 / Math.sqrt (w.x * w.x + w.z * w.z);
             u.x = -w.z * fInvLength;
             u.y = 0.0f;
             u.z = +w.x * fInvLength;
@@ -833,7 +831,7 @@ public final class Vector3d implements Savable, Cloneable, java.io.Serializable 
             v.z = -w.y * u.x;
         } else {
             // w.y or w.z is the largest magnitude component, swap them
-            fInvLength = FastMath.invSqrt((float) (w.y * w.y + w.z * w.z));
+            fInvLength = Math.sqrt(w.y * w.y + w.z * w.z);
             u.x = 0.0f;
             u.y = +w.z * fInvLength;
             u.z = -w.y * fInvLength;
@@ -876,6 +874,7 @@ public final class Vector3d implements Savable, Cloneable, java.io.Serializable 
      * @param o the object to compare for equality
      * @return true if they are equal
      */
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof Vector3d)) {
             return false;
@@ -905,6 +904,7 @@ public final class Vector3d implements Savable, Cloneable, java.io.Serializable 
      *
      * @return the hash code value of this vector.
      */
+    @Override
     public int hashCode() {
         int hash = 37;
         hash += 37 * hash + Double.doubleToLongBits(x);
@@ -921,10 +921,12 @@ public final class Vector3d implements Savable, Cloneable, java.io.Serializable 
      *
      * @return the string representation of this vector.
      */
+    @Override
     public String toString() {
         return "(" + x + ", " + y + ", " + z + ")";
     }
 
+    @Override
     public void write(JmeExporter e) throws IOException {
         OutputCapsule capsule = e.getCapsule(this);
         capsule.write(x, "x", 0);
@@ -932,6 +934,7 @@ public final class Vector3d implements Savable, Cloneable, java.io.Serializable 
         capsule.write(z, "z", 0);
     }
 
+    @Override
     public void read(JmeImporter e) throws IOException {
         InputCapsule capsule = e.getCapsule(this);
         x = capsule.readDouble("x", 0);

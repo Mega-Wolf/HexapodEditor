@@ -1,4 +1,3 @@
-// [[21.21875, 310.6875, 34.25, -10.0, -10.0, 10.0], [20.03125, 338.40625, 335.90625, -10.0, 10.0, -8.03125], [20.28125, 339.8125, 317.5, 10.0, 10.0, -2.46875]]
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -24,9 +23,6 @@ public class Robot {
 
     SimpleApplication app;
 
-    //Params
-    // Vector3f position = new Vector3f(0,0,0);
-    // Quaternion rotation = new Quaternion();
     //Nodes
     Node robotNode;
     Node[] nodeSolid = new Node[6];
@@ -53,7 +49,12 @@ public class Robot {
     float[] upAngles = {-60 / 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI};
     float[] downAngles = {120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI};
     
-    //touching stuff
+    /* Constructor */
+    
+    /**
+     * Creates a 3d model of the robot
+     * @param app 
+     */
     public Robot(SimpleApplication app) {
         this.app = app;
 
@@ -85,14 +86,7 @@ public class Robot {
 
             nodeSolid[i].rotate(0, (i * 60 + 30) / 180f * FastMath.PI, 0);
             jointSolid[i].setLocalTranslation(0, 0, 1);
-        }
-        
-        //robotNode.detachChild(nodeSolid[1]);
-        //robotNode.detachChild(nodeSolid[2]);
-        //robotNode.detachChild(nodeSolid[3]);
-        //robotNode.detachChild(nodeSolid[4]);
-        //robotNode.detachChild(nodeSolid[5]);
-        
+        }    
         
         Geometry gHorHex = Hexagon.create3DHexagon(0.15f, 0.5f);
 
@@ -171,33 +165,22 @@ public class Robot {
         
         robotNode.attachChild(sphereSpecial);
         
-        sphereSpecial.setLocalTranslation(0, 0, 1);
-        
+        sphereSpecial.setLocalTranslation(0, 0, 1);  
         updateRotations();
 
         //center();
     }
 
+    /**
+     * Sets the rotations
+     */
     public void updateRotations() {
-        for (int i = 0; i < DNA.LEGS; i++) {
-            
-            // [0, 360)
-            //nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i] / 180f * FastMath.PI, 0}));
-            //nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i] / 180f * FastMath.PI, 0, 0}));
-            //nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i] / 180f * FastMath.PI, 0, 0}));
-            
+        for (int i = 0; i < DNA.LEGS; i++) {        
             // [0, 2 * PI)
             nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i], 0}));
             nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i], 0, 0}));
             nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i], 0, 0}));
-        }
-        
-        
-        System.out.println("Important");
-        System.out.println(horizontalAngles[5]);
-        System.out.println(upAngles[5]);
-        System.out.println(downAngles[5]);
-        
+        }    
     }
 
     //Geometry centerGeometry;
@@ -236,32 +219,17 @@ public class Robot {
 
     int naturalMutation;
 
-    public void setRotation(TripodLoopRobot g, double t) {
-        
-        //sphereSpecial.setLocalTranslation((float)GeneticIK.posAim.x + FastMath.sin(2/3f * FastMath.PI), (float)GeneticIK.posAim.y, (float)GeneticIK.posAim.z + FastMath.cos(2/3f * FastMath.PI));
-        
-        
-        
-        //TODO
+    /**
+     * Gets the rotations from the associated AWalker
+     * @param g The associated robot
+     * @param t The time in the cycle (0 <= t < 1)
+     */
+    public void setRotation(AWalker g, double t) {
         g.setRotation(t);
-        //sphereSpecial.setLocalTranslation((float)TripodLoopRobot.posAimDebug.x, (float)TripodLoopRobot.posAimDebug.y, (float)TripodLoopRobot.posAimDebug.z);
-        //sphereSpecial.rotate(FastMath.PI / -4, 0, 0);
         for (int c = 0; c < DNA.LEGS; c++) {
             horizontalAngles[c] = (float) g.rotHorizontal[c];
             upAngles[c] = (float) g.rotTop[c];
             downAngles[c] = (float) g.rotBottom[c];
-            
-            
-            
-            /*
-            horizontalAngles[c] = (float) (gr.chromosomes[c][A_HORIZONTAL] + gr.chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_HORIZONTAL]));
-            upAngles[c] = (float) (gr.chromosomes[c][A_TOP] + gr.chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_TOP]));
-            downAngles[c] = (float) (gr.chromosomes[c][A_BOTTOM] + gr.chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_BOTTOM]));
-
-            horizontalAngles[LEGS - 1 - c] = (float) (-gr.chromosomes[c][A_HORIZONTAL] + gr.chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_HORIZONTAL]));
-            upAngles[LEGS - 1 - c] = (float) (gr.chromosomes[c][A_TOP] - gr.chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_TOP]));
-            downAngles[LEGS - 1 - c] = (float) (gr.chromosomes[c][A_BOTTOM] - gr.chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_BOTTOM]));
-            */
         }
         updateRotations();
     }
