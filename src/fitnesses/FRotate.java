@@ -11,15 +11,13 @@ import mygame.AWalker;
  *
  * @author Tobia
  */
-public class FHide implements IFitness{
+public class FRotate implements IFitness{
 
     @Override
     public void calcFitnessValue(AWalker walker) {
-        if (walker.getDirection()[0] != 0) {
-            walker.setFitness(-5 * walker.getStartHeight() + walker.getDirection()[1]);
-        }
+        walker.setFitness(Math.abs(walker.getRotationAngle()));
     }
-    
+
     @Override
     public void calcFitnessValueEveryFrame(AWalker walker) {
         //empty

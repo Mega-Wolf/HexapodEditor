@@ -15,7 +15,7 @@ public class FHigh implements IFitness {
 
     @Override
     public void calcFitnessValue(AWalker walker) {
-        walker.setFitness(walker.getHeight() + walker.getDirection()[1]);
+        walker.setFitness(walker.getStartHeight() + walker.getDirection()[1]);
     }
     
     @Override

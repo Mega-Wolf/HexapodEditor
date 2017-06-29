@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mygame;
+package visuals;
 
+import visuals.Hexagon;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -14,6 +15,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
+import mygame.AWalker;
 
 /**
  *
@@ -21,34 +23,33 @@ import com.jme3.scene.shape.Sphere;
  */
 public class Robot {
 
-    SimpleApplication app;
+    private final SimpleApplication app;
 
     //Nodes
-    Node robotNode;
-    Node[] nodeSolid = new Node[6];
-    Node[] nodeHorizontal = new Node[6];
-    Node[] nodeTop = new Node[6];
-    Node[] nodeBottom = new Node[6];
+    private final Node robotNode;
+    private final Node[] nodeSolid = new Node[6];
+    private final Node[] nodeHorizontal = new Node[6];
+    private final Node[] nodeTop = new Node[6];
+    private final Node[] nodeBottom = new Node[6];
 
     //Geometries
-    Geometry body;
+    private final Geometry body;
 
-    Geometry[] horizontalHex = new Geometry[6];
-    Geometry[] upHex = new Geometry[6];
-    Geometry[] downHex = new Geometry[6];
+    private final Geometry[] horizontalHex = new Geometry[6];
+    private final Geometry[] upHex = new Geometry[6];
+    private final Geometry[] downHex = new Geometry[6];
 
-    Geometry[] jointSolid = new Geometry[6];
-    Geometry[] jointHorizontal = new Geometry[6];
-    Geometry[] jointTop = new Geometry[6];
-    Geometry[] jointBottom = new Geometry[6];
+    private final Geometry[] jointSolid = new Geometry[6];
+    private final Geometry[] jointHorizontal = new Geometry[6];
+    private final Geometry[] jointTop = new Geometry[6];
+    private final Geometry[] jointBottom = new Geometry[6];
 
-    Geometry sphereSpecial;
+    private final Geometry sphereSpecial;
     
     //angles
-    float[] horizontalAngles = {0, 0, 0, 0, 0, 0};
-    float[] upAngles = {-60 / 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI};
-    float[] downAngles = {120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI};
-    
+    private final float[] horizontalAngles = {0, 0, 0, 0, 0, 0};
+    private final float[] upAngles = {-60 / 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI};
+    private final float[] downAngles = {120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI};
     /* Constructor */
     
     /**
@@ -175,7 +176,7 @@ public class Robot {
      * Sets the rotations
      */
     public void updateRotations() {
-        for (int i = 0; i < DNA.LEGS; i++) {        
+        for (int i = 0; i < AWalker.LEGS; i++) {        
             // [0, 2 * PI)
             nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i], 0}));
             nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i], 0, 0}));
@@ -217,6 +218,10 @@ public class Robot {
         //centerGeometry.setLocalTranslation(center);
     }
 
+    public Node getRobotNode(){
+        return robotNode;
+    }
+    
     int naturalMutation;
 
     /**
@@ -226,10 +231,10 @@ public class Robot {
      */
     public void setRotation(AWalker g, double t) {
         g.setRotation(t);
-        for (int c = 0; c < DNA.LEGS; c++) {
-            horizontalAngles[c] = (float) g.rotHorizontal[c];
-            upAngles[c] = (float) g.rotTop[c];
-            downAngles[c] = (float) g.rotBottom[c];
+        for (int c = 0; c < AWalker.LEGS; c++) {
+            horizontalAngles[c] = (float) g.getRotHorizontal()[c];
+            upAngles[c] = (float) g.getRotTop()[c];
+            downAngles[c] = (float) g.getRotBottom()[c];
         }
         updateRotations();
     }

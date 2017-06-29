@@ -1,10 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mygame;
 
+import math.Vector3d;
+import math.Transform;
+import math.Quaternion;
 import fitnesses.IFitness;
 import java.util.Arrays;
 
@@ -44,18 +42,24 @@ public abstract class AWalker {
     
     /* Variables */
     
+    // positions of the joints
     protected Vector3d posSolid[] = new Vector3d[LEGS];
     protected Vector3d posHorizontal[] = new Vector3d[LEGS];
     protected Vector3d posTop[] = new Vector3d[LEGS];
     protected Vector3d posBottom[] = new Vector3d[LEGS];
     
+    // angles of the joints
     protected double rotHorizontal[] = new double[LEGS];
     protected double rotTop[] = new double[LEGS];
     protected double rotBottom[] = new double[LEGS];
     
+    // fitness value is used by the genetic algorithm
     private double fitness = 0;
+    
+    // extra fitenss value is used for a frame based separated fitness valuein IFitness
     private double extraFitness = 0;
     
+    //two dimensional array, so the genes are located in chromosomes
     protected double[][] chromosomes;
     
     /* Constructors */
@@ -125,7 +129,7 @@ public abstract class AWalker {
         
         //könnte man eig einmal berechnen
         Transform tRobot = new Transform();
-        double[] rots = getRotation();
+        double[] rots = getStartRotation();
         tRobot.getRotation().multLocal(new Quaternion(new double[] {0, -rots[1],0}));
         tRobot.getRotation().multLocal(new Quaternion(new double[] {rots[0],0, 0}));
         tRobot.getRotation().multLocal(new Quaternion(new double[] {0, rots[1],0}));
@@ -370,12 +374,12 @@ public abstract class AWalker {
         for (int leg = 0; leg < LEGS; leg++) {
             
             //body - ground
-            if (posSolid[leg].y <= -getHeight()) {
+            if (posSolid[leg].y <= -getStartHeight()) {
                 fitness--;
             }
             
             //horizontal - ground
-            if (posHorizontal[leg].y <= -getHeight()) {
+            if (posHorizontal[leg].y <= -getStartHeight()) {
                 fitness--;
             }
             
@@ -615,7 +619,7 @@ public abstract class AWalker {
      * Note: 0 != ground; 0 = height of the bottom sphere center (change that?); ground = - sphereradius
      * @return the height above the bottom sphere center height
      */
-    public abstract double getHeight();
+    public abstract double getStartHeight();
     
     /**
      * Gets the moving vector of the robot
@@ -627,7 +631,15 @@ public abstract class AWalker {
      * Gets the initial rotation of the robot
      * @return 0: x; 1: z
      */
-    public abstract double[] getRotation();
+    public abstract double[] getStartRotation();
+    
+    /**
+     * Gets the angle around which a robot has turned during a walk
+     * @return the angle according to the current t
+     */
+    public abstract double getRotationAngle();
+
+    
     
     @Override
     public String toString() {

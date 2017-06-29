@@ -9,7 +9,7 @@ import math.Vector3d;
  *
  * @author Tobias
  */
-public class TripodLoopRobot extends AWalker{
+public class BetterRobot extends AWalker{
 
     /* TODOS */
     // maybe add speed later on
@@ -25,8 +25,9 @@ public class TripodLoopRobot extends AWalker{
     public static final int C_Y_OFFSET = 6;
     public static final int C_ROTATION = 7;
     public static final int C_TRANSLATION = 8;
+    public static final int C_MOVE_ROTATION = 9;
 
-    public static final int CHROMOSOMES = 9;
+    public static final int CHROMOSOMES = 10;
     
     /* Variables */
 
@@ -37,7 +38,7 @@ public class TripodLoopRobot extends AWalker{
     /**
      * Creates a default TripodLoopRobot; Not good but allowed
      */
-    public TripodLoopRobot() {
+    public BetterRobot() {
         super();
     }
 
@@ -50,7 +51,7 @@ public class TripodLoopRobot extends AWalker{
      * start rotation around the x,y,z axis chromosome 8: 2 doubles for x,z for
      * translation during walking
      */
-    public TripodLoopRobot(double[][] chromosomes) {
+    public BetterRobot(double[][] chromosomes) {
         this.chromosomes = chromosomes;
     }
 
@@ -61,37 +62,51 @@ public class TripodLoopRobot extends AWalker{
      * @param g0 Parent 1
      * @param g1 Parent 2
      */
-    public TripodLoopRobot(AWalker g0, AWalker g1) {
+    public BetterRobot(AWalker g0, AWalker g1) {
         super(g0, g1);
     }
 
     /* Methods */
 
     @Override
-    protected void mutateNormal(int c, int i) {
+    protected void mutateNormal(int c, int i) {        
+        
+        if (false) {
+            return;
+        }
+        
         if (c < LEGS) {
             chromosomes[c][i] += Math.random() - 0.5;
-            chromosomes[c][i] = clamp(-8, chromosomes[c][i], 8);
+            //chromosomes[c][i] = clamp(-8, chromosomes[c][i], 8);
         } else if (c == C_Y_OFFSET) {
             chromosomes[c][i] += Math.random() * 0.2 - 0.1;
-            chromosomes[c][i] = clamp(0, chromosomes[c][i], 3);
+            //chromosomes[c][i] = clamp(0, chromosomes[c][i], 3);
         } else if (c == C_ROTATION) {
             if (i == 0) {
-                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
+                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = clamp(-Math.PI / 2, chromosomes[c][i], Math.PI / 2);
             } else {    // y Wert egal
                 chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
                 chromosomes[c][i] = (2 * Math.PI + chromosomes[c][i]) % (2 * Math.PI);
             }
-            
-        } else {
-            chromosomes[c][i] += Math.random() - 0.5;
-            chromosomes[c][i] = clamp(-12, chromosomes[c][i], 12);
+        } else if (c == C_MOVE_ROTATION) {
+            chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
+            chromosomes[c][i] = clamp(-Math.PI, chromosomes[c][i], Math.PI);
         }
+        else {
+            chromosomes[c][i] += Math.random() - 0.5;
+            //chromosomes[c][i] = clamp(-12, chromosomes[c][i], 12);
+        }
+        
     }
     
     @Override
     protected void mutateCritical(int c, int i) {
+        
+        if (false) {
+            return;
+        }
+        
         if (c < LEGS) {
             chromosomes[c][i] = Math.random() * 16 - 8;
         } else if (c == C_Y_OFFSET) {
@@ -102,9 +117,12 @@ public class TripodLoopRobot extends AWalker{
             } else {
                 chromosomes[c][i] = Math.random() * Math.PI * 2;
             }
-        } else {
-            chromosomes[c][i] = Math.random() * 24 - 12;
+        } else if (c == C_MOVE_ROTATION) {
+            chromosomes[c][i] = Math.random() * Math.PI * 2 - Math.PI;
         }
+        else {
+            chromosomes[c][i] = Math.random() * 24 - 12;
+        } 
     }
 
     /**
@@ -117,11 +135,20 @@ public class TripodLoopRobot extends AWalker{
     }
 
     private void inverseKinematics(int leg) {
-        double tx = chromosomes[leg][G_X];
-        double tz = chromosomes[leg][G_Z];
+        
+        
+        double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * correctT);
+        double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * correctT);
+        
+        //double tx = chromosomes[leg][G_X] * (1 - correctT);
+        //double tz = chromosomes[leg][G_Z] * (1 - correctT);
 
+        double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
+        double tz = -1 -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
+        
         double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
         double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
+        
         
         double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
         double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
@@ -133,6 +160,19 @@ public class TripodLoopRobot extends AWalker{
         
         tx += cosA * posDiff.x + sinA * posDiff.z;
         tz += -sinA * posDiff.x + cosA * posDiff.z;
+        
+        
+        //double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
+        //double rotCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0]);
+        
+        //double rotSinA = Math.sin(0);
+        //double rotCosA = Math.cos(0);
+        
+        //double rotSinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
+        //double rotCosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
+        
+        //tx += correctT * (rotCosA * chromosomes[leg][G_X] + rotSinA * chromosomes[leg][G_Z]);
+        //tz += correctT * (-rotSinA * chromosomes[leg][G_X] + rotCosA * chromosomes[leg][G_Z]);
         
         //TODO; mal mit Quaternions rechnen; vllt sind die da genauer?
         //INfo; ist glaube ich eher ein Rechenproblem
@@ -164,32 +204,17 @@ public class TripodLoopRobot extends AWalker{
 
         Vector3d dummy = new Vector3d(L1 * sinB, 0, L1 * cosB);
         
-        //if (leg == 5) System.out.println("Dummy:" + dummy);
-
         //Beine anpassen
         double distSquared = dummy.distanceSquared(posAim);
         double dist = Math.sqrt(distSquared);
 
         double angleBody = Math.acos((L3 * L3 - distSquared - L2 * L2) / (-2 * dist * L2));
-
-        //if (leg == 5) System.out.println("Dist:" + dist);
-        
-        //if (leg == 5) System.out.println("Anglebody:" + angleBody * 180 / Math.PI);
-        
-        /*
-        if (angleBody == Double.NaN) {
-            return false;
-        }
-         */
-        
         
         double downAngle = Math.asin((posAim.y - dummy.y) / (dist));
 
         if (dummy.z > posAim.z) {
             downAngle = Math.PI - downAngle;
         }
-        
-        //if (leg == 5) System.out.println("Downangle:" + (downAngle * 180 / Math.PI));
         
         rotTop[leg] = (8 * Math.PI - (angleBody + downAngle)) % (2 * Math.PI);
 
@@ -200,17 +225,22 @@ public class TripodLoopRobot extends AWalker{
 
         double angleTop = Math.acos((distSquared - L2 * L2 - L3 * L3) / (-2 * L2 * L3));
 
-        //System.out.println(angleBody * 180 / Math.PI);
-        //System.out.println(downAngle * 180 / Math.PI);
         rotBottom[leg] = Math.PI - angleTop;
     }
 
     private void moveBack(int leg, double t) {
-        double tx = chromosomes[leg][G_X];
-        double tz = chromosomes[leg][G_Z];
+        
+        double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * correctT);
+        double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * correctT);
+        
+        //double tx = chromosomes[leg][G_X] * (1 - correctT);
+        //double tz = chromosomes[leg][G_Z] * (1 - correctT);
 
-        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
-        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
+        double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
+        double tz = -1 -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
+        
+        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0]);
+        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0]);
         
         double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
         double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
@@ -223,6 +253,20 @@ public class TripodLoopRobot extends AWalker{
         tx += cosA * posDiff.x + sinA * posDiff.z;
         ty += 0.5 * Math.sin(t * 2 * Math.PI);
         tz += -sinA * posDiff.x + cosA * posDiff.z;
+        
+        
+        double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
+        double rotCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0]);
+        
+        //double rotSinA = Math.sin(0);
+        //double rotCosA = Math.cos(0);
+        
+        //double rotSinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
+        //double rotCosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
+        
+        tx += correctT * (rotCosA * chromosomes[leg][G_X] + rotSinA * chromosomes[leg][G_Z]);
+        tz += correctT * (-rotSinA * chromosomes[leg][G_X] + rotCosA * chromosomes[leg][G_Z]);
+        
         
         Vector3d posAim = new Vector3d(
             -(tx * cosAY * cosAY + tx * cosX - tx * cosX * cosAY * cosAY - sinAY * sinX * ty - tz * cosAY * sinAY + tz * sinAY * cosX * cosAY),
@@ -248,9 +292,14 @@ public class TripodLoopRobot extends AWalker{
         inverseKinematics(leg, posAim);
         */
     }
+    
+    double correctT;
 
     @Override
     public void setRotation(double t) {
+        
+        correctT = t;
+
         if (t < 0.5) {
             setDistance(t);
             inverseKinematics(0);            
@@ -292,22 +341,35 @@ public class TripodLoopRobot extends AWalker{
     
     @Override
     public double getRotationAngle() {
-        return 0;
+        return chromosomes[C_MOVE_ROTATION][0];
     }
 
     @Override
     public AWalker newInstance() {
-        return new TripodLoopRobot();
+        return new BetterRobot();
     }
 
     @Override
     public AWalker newInstance(AWalker parent0, AWalker parent1) {
-        return new TripodLoopRobot(parent0, parent1);
+        return new BetterRobot(parent0, parent1);
     }
 
     @Override
     protected void setupChromosomes() {
         chromosomes = new double[][]{
+            /*
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {1.5},
+            {0, 0},
+            {0, 0},
+            {Math.PI / 4}
+            */
+            
             {0, 0},
             {0, 0},
             {0, 0},
@@ -317,6 +379,7 @@ public class TripodLoopRobot extends AWalker{
             {0},
             {0, 0},
             {0, 0},
+            {Math.PI }
         };
     }
 

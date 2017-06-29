@@ -1,5 +1,6 @@
 package mygame;
 
+import visuals.Robot;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -8,8 +9,9 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import fitnesses.FHideExtended;
+import fitnesses.FRotate;
 import fitnesses.IFitness;
 
 /**
@@ -21,7 +23,6 @@ import fitnesses.IFitness;
 public class Main extends SimpleApplication {
 
     boolean finished;
-    GeneticRobot finishedGR;
     
     Population population;
 
@@ -122,32 +123,90 @@ public class Main extends SimpleApplication {
         System.exit(0);
             */
         }
+        
+        
+        /*
+        
+        double[][] chroms = {
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {1},
+            {0, 0},
+            {0, 3},
+        };
+        
+       
+        t = new TripodLoopRobot(chroms);
+        
+        
+        Vector3d[][] jointSolid = new Vector3d[30][6];
+        Vector3d[][] jointHorizontal = new Vector3d[30][6];
+        Vector3d[][] jointTop = new Vector3d[30][6];
+        Vector3d[][] jointBottom = new Vector3d[30][6];
+        
+        Vector3d[] jointWeapon = new Vector3d[30];
+        
+        double[][] rotHorizontal = new double[30][6];
+        double[][] rotTop = new double[30][6];
+	double[][] rotBottom = new double[30][6];
+        
+        double initialHeight = 1;
+        double endHeight = 1;
+        double initialRotation = 0;
+        double endRotation = 0;
+	int frames = 30;
+        
+        for (int i = 0; i < 30; i++) {
+            t.setRotation(i / 30.0);
+            
+            jointSolid[i] = t.posSolid;
+            jointHorizontal[i] = t.posHorizontal;
+            jointTop[i] = t.posTop;
+            jointBottom[i] = t.posBottom;
+            
+            //jointWeapon = t.
+            
+            
+            
+        }
+        
+        */
+        
+        
          
         Main app = new Main();
         app.start();
     }
+    
+     //static TripodLoopRobot t;
 
     Robot robot;
 
     @Override
     public void simpleInitApp() {
         
+        IFitness fitness = new FRotate();
+        //IFitness fitness = new FFarthestMove();
+        //IFitness fitness = new FHide();
+        //IFitness fitness = new FHideExtended();
+        //IFitness fitness = new FLateral();
+        //IFitness fitness = new FHigh();
+            
+        //AWalker luca = new TripodLoopRobot();
+        AWalker luca = new BetterRobot();
+        population = new Population(luca, fitness);
+        
         Thread thread = new Thread(() -> {
-            //IFitness fitness = new FFarthestMove();
-            //IFitness fitness = new FHide();
-            IFitness fitness = new FHideExtended();
-            //IFitness fitness = new FLateral();
-            //IFitness fitness = new FHigh();
-            AWalker luca = new TripodLoopRobot();
-
-            population = new Population(luca, fitness);
             population.testGA();
          });
          
         thread.start();
         
         rootNode.scale(0.2f);
-        
         
         Quad q = new Quad(100, 100);
         Geometry groundGeometry = new Geometry("", q);
@@ -162,7 +221,10 @@ public class Main extends SimpleApplication {
         groundGeometry.setLocalTranslation(-50, - 0.2f, 50);
 
         robot = new Robot((SimpleApplication) this);
-        rootNode.attachChild(robot.robotNode);
+        
+        robotOuterNode.attachChild(robot.getRobotNode());
+        
+        rootNode.attachChild(robotOuterNode);
         //testGA();
 
         //double x = Math.PI / 6;
@@ -211,6 +273,8 @@ public class Main extends SimpleApplication {
 
     float sum = 0;
     AWalker walker;
+    
+    Node robotOuterNode = new Node();
 
     @Override
     public void simpleUpdate(float tpf) {
@@ -225,18 +289,19 @@ public class Main extends SimpleApplication {
             
             
             walker = population.getBest();
+            //walker = t;
             if (walker == null) {
                 return;
             }
             
             
-            robot.robotNode.rotateUpTo(new Vector3f(0, 1, 0));
+            robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
             
             System.out.println("Took this: " + walker);
             
-            robot.robotNode.rotate(0, (float) -walker.getRotation()[1], 0);
-            robot.robotNode.rotate((float) walker.getRotation()[0], 0, 0);
-            robot.robotNode.rotate(0, (float) walker.getRotation()[1], 0);
+            robot.getRobotNode().rotate(0, (float) -walker.getStartRotation()[1], 0);
+            robot.getRobotNode().rotate((float) walker.getStartRotation()[0], 0, 0);
+            robot.getRobotNode().rotate(0, (float) walker.getStartRotation()[1], 0);
         }
         
         /*
@@ -250,9 +315,11 @@ public class Main extends SimpleApplication {
         //robot.robotNode.setLocalTranslation(((int) (10 * sum) * 1f / 30f) % 1f * (float) walker.getDirection()[0], (float) walker.getHeight(), ((int) (10 * sum) * 1f / 30f) % 1f * (float) walker.getDirection()[1]);
         
         robot.setRotation(walker, sum % 1.);
-        robot.robotNode.setLocalTranslation(sum * (float) walker.getDirection()[0], (float) walker.getHeight(), sum * (float) walker.getDirection()[1]);
+        robotOuterNode.setLocalTranslation(sum * (float) walker.getDirection()[0], (float) walker.getStartHeight(), sum * (float) walker.getDirection()[1]);
+        robotOuterNode.setLocalRotation(new Quaternion(new float[] {0, sum * (float) walker.getRotationAngle(), 0}));
         
-        sum += tpf /* / 5. */;
+        
+        sum += tpf  / 3.  ;
         if (sum > 2) {
         //if (sum > 20) {
             sum = 0;

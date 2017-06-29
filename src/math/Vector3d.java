@@ -1,4 +1,4 @@
-package mygame;
+package math;
 
 import com.jme3.export.*;
 import java.io.IOException;
