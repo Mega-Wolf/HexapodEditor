@@ -20,7 +20,7 @@ public class Population {
     
     /* Variables */
     
-    private final List<AWalker> bestRobots = Collections.synchronizedList(new ArrayList<>());
+    /*private*/ final List<AWalker> bestRobots = Collections.synchronizedList(new ArrayList<>());
     private final IFitness fitness;
     private final AWalker luca;
     
@@ -31,6 +31,11 @@ public class Population {
     }
     
     public void testGA() {
+
+        System.out.println("Start NEW");
+
+        
+        bestRobots.clear();
 
         int POPULATION_SIZE = 128;
 
@@ -99,6 +104,10 @@ public class Population {
                 //System.out.println(lowestFail + "," + population[0].getFitness() + "," + population[POPULATION_SIZE - 1].getFitness());
                 System.out.println(population[0].getFitness());
                 bestRobots.add(population[0]);
+            }
+            
+            if (loop > 1500) {
+                break;
             }
 
             if (loop > 10_000_000) {

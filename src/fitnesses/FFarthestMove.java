@@ -18,7 +18,9 @@ public class FFarthestMove implements IFitness{
     
     @Override
     public void calcFitnessValue(AWalker walker) {
-        walker.setFitness(-walker.getDirection()[0] * walker.getDirection()[0] + walker.getDirection()[1] * walker.getDirection()[1]);
+        //walker.setFitness(-walker.getDirection()[0] * walker.getDirection()[0] + walker.getDirection()[1] * walker.getDirection()[1]);
+        
+        walker.setFitness(Math.abs(walker.getDirection()[1]) * walker.getDirection()[1] - (walker.getDirection()[0] * walker.getDirection()[0]));
     }
 
     @Override

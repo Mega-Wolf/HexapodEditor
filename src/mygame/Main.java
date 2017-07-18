@@ -2,24 +2,20 @@ package mygame;
 
 import visuals.Robot;
 import com.jme3.app.SimpleApplication;
+import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import fitnesses.FRotate;
+import fitnesses.FLateral;
 import fitnesses.IFitness;
 
-/**
- * This is the Main Class of your Game. You should only do initialization here.
- * Move your Logic into AppStates or Controls
- *
- * @author normenhansen
- */
 public class Main extends SimpleApplication {
 
     boolean finished;
@@ -181,27 +177,45 @@ public class Main extends SimpleApplication {
         Main app = new Main();
         app.start();
     }
-    
-     //static TripodLoopRobot t;
 
     Robot robot;
+    
+    BitmapText fitnessText;
 
     @Override
     public void simpleInitApp() {
         
-        IFitness fitness = new FRotate();
+        viewPort.setBackgroundColor(new ColorRGBA(0, 0.6f, 0.9f , 1));
+        
+        //setDisplayStatView(false); setDisplayFps(false);
+        
+        fitnessText = new BitmapText(guiFont, false);
+        fitnessText.setQueueBucket(Bucket.Gui);
+        
+        fitnessText.setSize(guiFont.getCharSet().getRenderedSize());
+        fitnessText.setText("Fitness: ");
+        fitnessText.setLocalTranslation(300, fitnessText.getLineHeight(), 0);
+        fitnessText.setColor(new ColorRGBA(0.5f,0,0,1));
+        
+        
+        
+        guiNode.attachChild(fitnessText);
+        
+        //IFitness fitness = new FRotate();
         //IFitness fitness = new FFarthestMove();
         //IFitness fitness = new FHide();
         //IFitness fitness = new FHideExtended();
-        //IFitness fitness = new FLateral();
+        IFitness fitness = new FLateral();
         //IFitness fitness = new FHigh();
             
-        //AWalker luca = new TripodLoopRobot();
-        AWalker luca = new BetterRobot();
+        AWalker luca = new TripodLoopRobot();
+        //AWalker luca = new BetterRobot();
         population = new Population(luca, fitness);
         
         Thread thread = new Thread(() -> {
-            population.testGA();
+            while(true) {
+                population.testGA();
+            }
          });
          
         thread.start();
@@ -212,7 +226,7 @@ public class Main extends SimpleApplication {
         Geometry groundGeometry = new Geometry("", q);
 
         Material matSphere = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        matSphere.setColor("Color", ColorRGBA.Green);
+        matSphere.setColor("Color", new ColorRGBA(0.1f,0.7f,0.2f,1f));
 
         groundGeometry.setMaterial(matSphere);
 
@@ -287,13 +301,15 @@ public class Main extends SimpleApplication {
         
         if (sum == 0) {
             
-            
             walker = population.getBest();
+            int number = population.bestRobots.size() - 1;
+            
             //walker = t;
             if (walker == null) {
                 return;
             }
             
+            fitnessText.setText("Fitness: " + walker.getFitness() + "          Generation: " + (number * 10));
             
             robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
             
@@ -319,7 +335,7 @@ public class Main extends SimpleApplication {
         robotOuterNode.setLocalRotation(new Quaternion(new float[] {0, sum * (float) walker.getRotationAngle(), 0}));
         
         
-        sum += tpf  / 3.  ;
+        sum += tpf  / 2.  ;
         if (sum > 2) {
         //if (sum > 20) {
             sum = 0;
