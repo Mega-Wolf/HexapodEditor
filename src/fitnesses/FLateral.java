@@ -5,7 +5,7 @@
  */
 package fitnesses;
 
-import mygame.AWalker;
+import robots.AWalker;
 
 /**
  *

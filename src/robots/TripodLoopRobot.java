@@ -1,6 +1,7 @@
 //Tripod :[[-1.432821159681283, 4.502035344895974], [-0.40891439891937764, -0.6651818060981322], [2.9375258559642132, 1.7361534800301865], [-1.2600145447558977, 4.392344095316288], [-1.576993487322087, 0.8825759780361142], [2.1821855758332025, 2.1825797407084107], [0.9442307092252811], [0.026254282811909353, 2.068521330609688], [6.685559340073908, 8.0]]	Fitness: 14.685559340073908
-package mygame;
+package robots;
 
+import robots.AWalker;
 import math.Vector3d;
 
 /**
@@ -35,10 +36,11 @@ public class TripodLoopRobot extends AWalker{
     /* Constructor */
     
     /**
-     * Creates a default TripodLoopRobot; Not good but allowed
+     * Creates a TipodLoopRobot
+     * @param mutate whether the robot is a random one or the default one
      */
-    public TripodLoopRobot() {
-        super();
+    public TripodLoopRobot(boolean mutate) {
+        super(mutate);
     }
 
     /**
@@ -297,7 +299,7 @@ public class TripodLoopRobot extends AWalker{
 
     @Override
     public AWalker newInstance() {
-        return new TripodLoopRobot();
+        return new TripodLoopRobot(true);
     }
 
     @Override

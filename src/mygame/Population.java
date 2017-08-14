@@ -5,6 +5,7 @@
  */
 package mygame;
 
+import robots.AWalker;
 import fitnesses.IFitness;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class Population {
     
     /* Variables */
     
-    /*private*/ final List<AWalker> bestRobots = Collections.synchronizedList(new ArrayList<>());
+    private final List<AWalker> bestRobots = Collections.synchronizedList(new ArrayList<>());
     private final IFitness fitness;
     private final AWalker luca;
     
@@ -157,5 +158,9 @@ public class Population {
             return null;
         }
         return bestRobots.get(bestRobots.size() - 1);
+    }
+    
+    public List<AWalker> getBestRobots() {
+        return bestRobots;
     }
 }

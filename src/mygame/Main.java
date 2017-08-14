@@ -1,5 +1,7 @@
 package mygame;
 
+import robots.TripodLoopRobot;
+import robots.AWalker;
 import visuals.Robot;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
@@ -13,7 +15,7 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import fitnesses.FLateral;
+import fitnesses.FHideExtended;
 import fitnesses.IFitness;
 
 public class Main extends SimpleApplication {
@@ -204,8 +206,8 @@ public class Main extends SimpleApplication {
         //IFitness fitness = new FRotate();
         //IFitness fitness = new FFarthestMove();
         //IFitness fitness = new FHide();
-        //IFitness fitness = new FHideExtended();
-        IFitness fitness = new FLateral();
+        IFitness fitness = new FHideExtended();
+        //IFitness fitness = new FLateral();
         //IFitness fitness = new FHigh();
             
         AWalker luca = new TripodLoopRobot();
@@ -302,14 +304,18 @@ public class Main extends SimpleApplication {
         if (sum == 0) {
             
             walker = population.getBest();
-            int number = population.bestRobots.size() - 1;
+            int number = population.getBestRobots().size() - 1;
             
             //walker = t;
             if (walker == null) {
                 return;
             }
             
-            fitnessText.setText("Fitness: " + walker.getFitness() + "          Generation: " + (number * 10));
+            fitnessText.setText("Fitness: " + walker.getFitness() +
+                    "          Generation: " + (number * 10) + 
+                    "          Movement total: " + Math.sqrt(walker.getDirection()[0] * walker.getDirection()[0] + walker.getDirection()[1] * walker.getDirection()[1]) + 
+                    "          (Movement ahead: " + walker.getDirection()[1] + 
+                    "          Movement lateral: " + walker.getDirection()[0] + ")");
             
             robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
             

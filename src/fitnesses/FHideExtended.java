@@ -5,7 +5,7 @@
  */
 package fitnesses;
 
-import mygame.AWalker;
+import robots.AWalker;
 
 /**
  *
@@ -19,7 +19,7 @@ public class FHideExtended implements IFitness{
             //walker.setFitness(-walker.getExtraFitness() + 1000 * 30 * (5 * walker.getHeight() + walker.getDirection()[1]));
             //walker.setFitness(walker.getExtraFitness() + 10 * (- walker.getHeight() + 2.5* Math.abs(walker.getDirection()[1])));
             
-            walker.setFitness(3 - (Math.max(walker.getExtraFitness(), walker.getStartHeight() )));
+            walker.setFitness(3 - (Math.max(walker.getExtraFitness(), walker.getStartHeight() )) /*+ walker.getDirection()[1] / 8*/);
         }
     }
     

@@ -1,4 +1,4 @@
-package mygame;
+package robots;
 
 import math.Vector3d;
 import math.Transform;
@@ -8,77 +8,84 @@ import java.util.Arrays;
 
 /**
  * A robot which is able to walk in any form and is able to be used in a GA
+ *
  * @author Tobias
  */
 public abstract class AWalker {
-    
+
     /* Consts */
-    
     //GA stuff
     public static /*final*/ double MUTATION_RATE = 0.15;
-    
+
     public static final int LEGS = 6;
-    
+
     //robot measurements
     public static final double A = 1;
     public static final double L1 = 0.5;
     public static final double L2 = 1.5;
     public static final double L3 = 3;
-    
+
     public static final double SPHERE_RADIUS = 0.2;
     public static final double CHECK_SQUARED = (2 * 0.2) * (2 * 0.2);
 
     // allowed angles
-    public static final double HORIZONTAL_MAX =  60 / 180. * Math.PI;
+    public static final double HORIZONTAL_MAX = 60 / 180. * Math.PI;
     public static final double HORIZONTAL_MIN = -60 / 180. * Math.PI;
 
-    public static final double TOP_MAX =    0 / 180. * Math.PI;
+    public static final double TOP_MAX = 0 / 180. * Math.PI;
     public static final double TOP_MIN = -135 / 180. * Math.PI;
 
     public static final double BOTTOM_MAX = 165 / 180. * Math.PI;
-    public static final double BOTTOM_MIN =   0 / 180. * Math.PI;
+    public static final double BOTTOM_MIN = 0 / 180. * Math.PI;
 
-
-    
     /* Variables */
-    
     // positions of the joints
     protected Vector3d posSolid[] = new Vector3d[LEGS];
     protected Vector3d posHorizontal[] = new Vector3d[LEGS];
     protected Vector3d posTop[] = new Vector3d[LEGS];
     protected Vector3d posBottom[] = new Vector3d[LEGS];
-    
+
     // angles of the joints
     protected double rotHorizontal[] = new double[LEGS];
     protected double rotTop[] = new double[LEGS];
     protected double rotBottom[] = new double[LEGS];
-    
+
     // fitness value is used by the genetic algorithm
     private double fitness = 0;
-    
+
     // extra fitenss value is used for a frame based separated fitness valuein IFitness
     private double extraFitness = 0;
-    
+
     //two dimensional array, so the genes are located in chromosomes
     protected double[][] chromosomes;
-    
+
     /* Constructors */
-    
     /**
      * Creates a new robot (at the start of the simulation)
      */
     public AWalker() {
         setupChromosomes();
-        for (int c = 0 ; c < chromosomes.length; c++) {
-            for (int i = 0; i < chromosomes[c].length; i++) {
-                mutateCritical(c, i);
+    }
+
+    /**
+     * Creates a new robot (at the start of the simulation)
+     * @param mutate whether the robot is a random one
+     */
+    public AWalker(boolean mutate) {
+        this();
+
+        if (mutate) {
+            for (int c = 0; c < chromosomes.length; c++) {
+                for (int i = 0; i < chromosomes[c].length; i++) {
+                    mutateCritical(c, i);
+                }
             }
         }
     }
-    
+
     /**
      * Creates a new robot out of two parents (they should be of the same type)
-     * 
+     *
      * @param parent0 a parent
      * @param parent1 other parent
      */
@@ -89,9 +96,8 @@ public abstract class AWalker {
         }
         mutate();
     }
-    
+
     /* Methods */
-    
     /**
      * Mutates the genes of the robot
      */
@@ -108,7 +114,7 @@ public abstract class AWalker {
             }
         }
     }
-    
+
     public double initialFitnessChecks(IFitness fitnessFunction) {
         for (int i = 0; i < 30; i++) {
             setRotation(i / 30.0);
@@ -116,68 +122,68 @@ public abstract class AWalker {
             correctAngles();
             noIntersection();
             checkUgly(i);
-           
+
             if (fitness == 0) {
                 fitnessFunction.calcFitnessValueEveryFrame(this);
             }
         }
         return fitness;
     }
-    
+
     private void calcPositions() {
         //TODO; mega ugly und uneffektiv; aber immerhin funktioniert es endlich
-        
+
         //könnte man eig einmal berechnen
         Transform tRobot = new Transform();
         double[] rots = getStartRotation();
-        tRobot.getRotation().multLocal(new Quaternion(new double[] {0, -rots[1],0}));
-        tRobot.getRotation().multLocal(new Quaternion(new double[] {rots[0],0, 0}));
-        tRobot.getRotation().multLocal(new Quaternion(new double[] {0, rots[1],0}));
-        
+        tRobot.getRotation().multLocal(new Quaternion(new double[]{0, -rots[1], 0}));
+        tRobot.getRotation().multLocal(new Quaternion(new double[]{rots[0], 0, 0}));
+        tRobot.getRotation().multLocal(new Quaternion(new double[]{0, rots[1], 0}));
+
         for (int leg = 0; leg < LEGS; leg++) {
             Transform nodeSolid = new Transform();
-            nodeSolid.getRotation().multLocal(new Quaternion(new double[] {0, (60 * leg + 30) / 180.0 * Math.PI, 0}));
+            nodeSolid.getRotation().multLocal(new Quaternion(new double[]{0, (60 * leg + 30) / 180.0 * Math.PI, 0}));
             nodeSolid.combineWithParent(tRobot);
-            
+
             Transform jointSolid = new Transform();
             jointSolid.setTranslation(0, 0, 1);
             jointSolid.combineWithParent(nodeSolid);
             posSolid[leg] = jointSolid.getTranslation();
-            
+
             Transform nodeHorizontal = new Transform();
             nodeHorizontal.setTranslation(0, 0, 1);
-            nodeHorizontal.getRotation().multLocal(new Quaternion(new double[]  {0, rotHorizontal[leg], 0}));
+            nodeHorizontal.getRotation().multLocal(new Quaternion(new double[]{0, rotHorizontal[leg], 0}));
             nodeHorizontal.combineWithParent(nodeSolid);
-            
+
             Transform jointHorizontal = new Transform();
             jointHorizontal.setTranslation(0, 0, 0.5);
             jointHorizontal.combineWithParent(nodeHorizontal);
             posHorizontal[leg] = jointHorizontal.getTranslation();
-            
+
             Transform nodeTop = new Transform();
             nodeTop.setTranslation(0, 0, 0.5);
-            nodeTop.getRotation().multLocal(new Quaternion(new double[]  {rotTop[leg], 0, 0}));
+            nodeTop.getRotation().multLocal(new Quaternion(new double[]{rotTop[leg], 0, 0}));
             nodeTop.combineWithParent(nodeHorizontal);
-            
+
             Transform jointTop = new Transform();
             jointTop.setTranslation(0, 0, 1.5);
             jointTop.combineWithParent(nodeTop);
             posTop[leg] = jointTop.getTranslation();
-            
+
             Transform nodeBottom = new Transform();
             nodeBottom.setTranslation(0, 0, 1.5);
-            nodeBottom.getRotation().multLocal(new Quaternion(new double[]  {rotBottom[leg], 0, 0}));
+            nodeBottom.getRotation().multLocal(new Quaternion(new double[]{rotBottom[leg], 0, 0}));
             nodeBottom.combineWithParent(nodeTop);
-            
+
             Transform jointBottom = new Transform();
             jointBottom.setTranslation(0, 0, 3);
             jointBottom.combineWithParent(nodeBottom);
             posBottom[leg] = jointBottom.getTranslation();
         }
     }
-    
+
     {
-    /*
+        /*
     private void calcPositionsOld() {
         
         for (int leg = 0; leg < 1; leg++) {
@@ -326,63 +332,59 @@ public abstract class AWalker {
             
         }
     }
-*/
+         */
     }
-    
+
     /**
      * Checks if all angles of the robot are in an allowed state
      */
-    private void correctAngles() {        
+    private void correctAngles() {
         //TODO; evtl. später mal mit genaueren Daten machen; jetzt gilt einfach: falscher Winkel = -1; tut aber schon ganz gut
-        
+
         for (int leg = 0; leg < LEGS; leg++) {
             if (rotHorizontal[leg] < HORIZONTAL_MIN || rotHorizontal[leg] > HORIZONTAL_MAX) {
                 //double d = rotHorizontal[leg] - (HORIZONTAL_MIN + HORIZONTAL_MAX / 2);
-                
+
                 //fitness -= d > d + 2;
-                
                 fitness--;
             }
-            
+
             if (Double.isNaN(rotBottom[leg]) || rotBottom[leg] < BOTTOM_MIN || rotBottom[leg] > BOTTOM_MAX) {
                 //fitness -= Math.abs(rotHorizontal[leg] - (HORIZONTAL_MIN + HORIZONTAL_MAX / 2));
                 fitness--;
             }
-            
+
             /*
             if (Double.isNaN(rotTop[leg]) || rotTop[leg] < TOP_MIN){
                 fitness--;
             }
-            */
-            
-            
+             */
             if (Double.isNaN(rotTop[leg]) || (rotTop[leg] >= TOP_MAX && rotTop[leg] <= 2 * Math.PI + TOP_MIN)) {
                 fitness--;
             }
-            
+
         }
     }
 
     /**
      * Checks, if the robt parts aren't in an unallowed state
      */
-    private void noIntersection() {        
+    private void noIntersection() {
         // WICHTIG: Später auch die Möglichkeit um auf Hindernisse zu testen
-        
-        //Pro Kollision: fitness -= 1
 
+        //Pro Kollision: fitness -= 1
         for (int leg = 0; leg < LEGS; leg++) {
-            
+
             //body - ground
             if (posSolid[leg].y <= -getStartHeight()) {
                 fitness--;
             }
-            
+
             //horizontal - ground
             if (posHorizontal[leg].y <= -getStartHeight()) {
                 fitness--;
             }
-            
+
             //bottom - bottom; der übernächste
             if (posBottom[leg].distanceSquared(posBottom[(leg + 2) % LEGS]) <= CHECK_SQUARED) {
                 fitness--;
@@ -391,81 +393,86 @@ public abstract class AWalker {
             if (posBottom[leg].distanceSquared(posBottom[(leg + 3) % LEGS]) <= CHECK_SQUARED) {
                 fitness--;
             }
-            
+
             //L2 - L2
             if (intersectCapsules(posHorizontal[leg], posTop[leg], posHorizontal[(leg + 1) % 6], posTop[(leg + 1) % 6])) {
                 fitness--;
             }
-            
+
             //L2 - L3
             if (intersectCapsules(posHorizontal[leg], posTop[leg], posTop[(leg + 1) % 6], posBottom[(leg + 1) % 6])) {
                 fitness--;
             }
-            
+
             //L3 - L2
             if (intersectCapsules(posTop[leg], posBottom[leg], posHorizontal[(leg + 1) % 6], posTop[(leg + 1) % 6])) {
                 fitness--;
             }
-            
+
             //L3 - L3
             if (intersectCapsules(posTop[leg], posBottom[leg], posTop[(leg + 1) % 6], posBottom[(leg + 1) % 6])) {
                 fitness--;
             }
         }
     }
-    
-    
+
     double[] lastRotation = new double[6];
     double[] firstRotation = new double[6];
+
     private void checkUgly(int frame) {
-        if (frame == 0) {
-            for (int i = 0; i < 6; i++) {
-                lastRotation[i] = rotHorizontal[i];
-                firstRotation[i] = rotHorizontal[i];
-            }
-        } else if (frame == 29) {
-            for (int i = 0; i < 6; i++) {
-                if (Math.abs(lastRotation[i] - rotHorizontal[i]) >= 0.1) {
-                    fitness--;
+        switch (frame) {
+            case 0:
+                for (int i = 0; i < 6; i++) {
+                    lastRotation[i] = rotHorizontal[i];
+                    firstRotation[i] = rotHorizontal[i];
                 }
-                if (Math.abs(firstRotation[i] - rotHorizontal[i]) >= 0.1) {
-                    fitness--;
+                break;
+            case 29:
+                for (int i = 0; i < 6; i++) {
+                    if (Math.abs(lastRotation[i] - rotHorizontal[i]) >= 0.1) {
+                        fitness--;
+                    }
+                    if (Math.abs(firstRotation[i] - rotHorizontal[i]) >= 0.1) {
+                        fitness--;
+                    }
                 }
-            }
-        } else {
-            for (int i = 0; i < 6; i++) {
-                if (Math.abs(lastRotation[i] - rotHorizontal[i]) >= 0.1) {
-                    fitness--;
+                break;
+            default:
+                for (int i = 0; i < 6; i++) {
+                    if (Math.abs(lastRotation[i] - rotHorizontal[i]) >= 0.1) {
+                        fitness--;
+                    }
+                    lastRotation[i] = rotHorizontal[i];
                 }
-                lastRotation[i] = rotHorizontal[i];
-            }
+                break;
         }
     }
-    
+
     /**
      * Checks if two capsules collide; r is the sphere-radius
+     *
      * @param start1 one joint of the first capsule
      * @param end1 other joint of the first capsule
      * @param start2 one joint of the second capsule
      * @param end2 other joint of the second capsule
-     * @return 
+     * @return
      */
     private static boolean intersectCapsules(Vector3d start1, Vector3d end1, Vector3d start2, Vector3d end2) {
         Vector3d direction1 = end1.subtract(start1);
         Vector3d direction2 = end2.subtract(start2);
-        
+
         Vector3d sDiff = start2.subtract(start1);
-        
+
         double s1r2 = direction2.dot(direction1);   // rs = - s1
         double r1 = -direction1.dot(direction1);
         double equals1 = -sDiff.dot(direction1);
-        
+
         double s2 = direction2.dot(direction2);
         double equals2 = -sDiff.dot(direction2);
-        
+
         double finalR;
         double finalS;
-        
+
         if (s1r2 != 0) {
             finalR = (equals2 - (s2 / s1r2) * equals1) / (-s1r2 - (s2 / s1r2) * r1);
             finalS = finalR * (-r1 / s1r2) + equals1 / s1r2;
@@ -473,36 +480,40 @@ public abstract class AWalker {
             finalR = equals1 / r1;
             finalS = equals2 / s2;
         }
-        
+
         finalR = clamp(0, finalR, 1);
         finalS = clamp(0, finalS, 1);
-        
-        return start1.add(direction1.mult(finalR)).distanceSquared(start2.add(direction2.mult(finalS))) <= CHECK_SQUARED;   
+
+        return start1.add(direction1.mult(finalR)).distanceSquared(start2.add(direction2.mult(finalS))) <= CHECK_SQUARED;
     }
-    
+
     /**
-     * Clamps a value
-     * IMPORTANT: Don't forget to assign this value to the variable
+     * Clamps a value IMPORTANT: Don't forget to assign this value to the
+     * variable
+     *
      * @param min the minimum value
      * @param val the value to clamp
      * @param max the maximum value
-     * @return 
+     * @return
      */
     protected static double clamp(double min, double val, double max) {
         return Math.max(min, Math.min(max, val));
     }
-    
+
     /* Abstract Methods */
-    
     /**
-     * Mutates the genes of the robot critically: sets a value anywhere in the allowed range of values
+     * Mutates the genes of the robot critically: sets a value anywhere in the
+     * allowed range of values
+     *
      * @param c the chromosome to mutate
      * @param i the gene on the chromosome
      */
     protected abstract void mutateCritical(int c, int i);
-    
+
     /**
-     * Mutates the genes of the robot normally: changes the value a bit and clamps it to the allowed range
+     * Mutates the genes of the robot normally: changes the value a bit and
+     * clamps it to the allowed range
+     *
      * @param c the chromosome to mutate
      * @param i the gene on the chromosome
      */
@@ -510,137 +521,150 @@ public abstract class AWalker {
 
     /**
      * Sets the feet according to the time
+     *
      * @param t time of the cycle; 0 <= t < 1
      */
     public abstract void setRotation(double t);
-    
+
     public abstract AWalker newInstance();
-    
+
     public abstract AWalker newInstance(AWalker parent0, AWalker parent1);
-    
+
     protected abstract void setupChromosomes();
-    
+
     /* Setter */
-    
     /**
      * Sets the fitness of this robot
+     *
      * @param fitness the fitness of the robot
      */
     public void setFitness(double fitness) {
         this.fitness = fitness;
     }
-    
+
     /**
-     * Sets the extraFitness of this robot; the extra fitness is a special fitness value, which is used for calculateFitnessEveryFrame
+     * Sets the extraFitness of this robot; the extra fitness is a special
+     * fitness value, which is used for calculateFitnessEveryFrame
+     *
      * @param extraFitness the fitness of the robot
      */
     public void setExtraFitness(double extraFitness) {
         this.extraFitness = extraFitness;
     }
-    
+
     /* Getter */
-    
     /**
      * Gets the horizontal rotation (rotation around body edges)
+     *
      * @return the rotations (in radians) per leg
      */
     public double[] getRotHorizontal() {
         return rotHorizontal;
     }
-    
+
     /**
      * Gets the up rotation (rotation around the second sphere)
+     *
      * @return the rotations (in radians) per leg
      */
     public double[] getRotTop() {
         return rotTop;
     }
-    
+
     /**
      * Gets the down rotation (rotation around third sphere)
+     *
      * @return the rotations (in radians) per leg
      */
     public double[] getRotBottom() {
         return rotBottom;
     }
-    
+
     /**
      * Gets the position of the solid joints
+     *
      * @return the positions of the solid joints
      */
     public Vector3d[] getPosSolid() {
         return posSolid;
     }
-    
+
     /**
      * Gets the position of the horizontal joints
+     *
      * @return the positions of the horizontal joints
      */
     public Vector3d[] getPosHorizontal() {
         return posHorizontal;
     }
-    
+
     /**
      * Gets the position of the top joints
+     *
      * @return the positions of the top joints
      */
     public Vector3d[] getPosTop() {
         return posTop;
     }
-    
+
     /**
      * Gets the position of the bottom joints
+     *
      * @return the positions of the bottom joints
      */
     public Vector3d[] getPosBottom() {
         return posBottom;
     }
-    
+
     /**
      * Gets the fitness value of this robot
-     * @return 
+     *
+     * @return
      */
     public double getFitness() {
         return fitness;
     }
-    
+
     /**
      * Gets the extraFitness value of this robot
-     * @return 
+     *
+     * @return
      */
     public double getExtraFitness() {
         return extraFitness;
     }
-    
+
     /* Abstract Getter */
-    
     /**
-     * Gets the initial height of the center of the robot body
-     * Note: 0 != ground; 0 = height of the bottom sphere center (change that?); ground = - sphereradius
+     * Gets the initial height of the center of the robot body Note: 0 !=
+     * ground; 0 = height of the bottom sphere center (change that?); ground = -
+     * sphereradius
+     *
      * @return the height above the bottom sphere center height
      */
     public abstract double getStartHeight();
-    
+
     /**
      * Gets the moving vector of the robot
+     *
      * @return 0: x; 1: z
      */
     public abstract double[] getDirection();
-    
+
     /**
      * Gets the initial rotation of the robot
+     *
      * @return 0: x; 1: z
      */
     public abstract double[] getStartRotation();
-    
+
     /**
      * Gets the angle around which a robot has turned during a walk
+     *
      * @return the angle according to the current t
      */
     public abstract double getRotationAngle();
 
-    
-    
     @Override
     public String toString() {
         return this.getClass() + ":" + Arrays.deepToString(chromosomes) + "\tFitness: " + fitness;

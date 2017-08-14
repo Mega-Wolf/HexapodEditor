@@ -5,7 +5,6 @@
  */
 package visuals;
 
-import visuals.Hexagon;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -15,10 +14,10 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
-import mygame.AWalker;
+import robots.AWalker;
 
 /**
- *
+ * 3D representation of the robot in the scene
  * @author Tobias
  */
 public class Robot {
@@ -217,13 +216,15 @@ public class Robot {
         return center;
         //centerGeometry.setLocalTranslation(center);
     }
+    
+    /* Getter */
 
     public Node getRobotNode(){
         return robotNode;
     }
-    
-    int naturalMutation;
 
+    /* Setter */
+    
     /**
      * Gets the rotations from the associated AWalker
      * @param g The associated robot
