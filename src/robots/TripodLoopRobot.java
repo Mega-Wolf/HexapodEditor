@@ -1,22 +1,18 @@
 //Tripod :[[-1.432821159681283, 4.502035344895974], [-0.40891439891937764, -0.6651818060981322], [2.9375258559642132, 1.7361534800301865], [-1.2600145447558977, 4.392344095316288], [-1.576993487322087, 0.8825759780361142], [2.1821855758332025, 2.1825797407084107], [0.9442307092252811], [0.026254282811909353, 2.068521330609688], [6.685559340073908, 8.0]]	Fitness: 14.685559340073908
 package robots;
 
-import robots.AWalker;
 import math.Vector3d;
 
 /**
  * A robot which can loop animations with Inverse Kinematics, the end state must
  * be the beginning state
+ * This kind of robot cannot rotate during movement
  *
  * @author Tobias
  */
-public class TripodLoopRobot extends AWalker{
-
-    /* TODOS */
-    // maybe add speed later on
+public class TripodLoopRobot extends AWalker {
 
     /* Consts */
-    
     //genes
     public static final int G_X = 0;
     public static final int G_Z = 1;
@@ -28,15 +24,15 @@ public class TripodLoopRobot extends AWalker{
     public static final int C_TRANSLATION = 8;
 
     public static final int CHROMOSOMES = 9;
-    
-    /* Variables */
 
+    /* Variables */
     private Vector3d posDiff;
 
     /* Constructor */
     
     /**
      * Creates a TipodLoopRobot
+     *
      * @param mutate whether the robot is a random one or the default one
      */
     public TripodLoopRobot(boolean mutate) {
@@ -68,7 +64,6 @@ public class TripodLoopRobot extends AWalker{
     }
 
     /* Methods */
-
     @Override
     protected void mutateNormal(int c, int i) {
         if (c < LEGS) {
@@ -85,13 +80,13 @@ public class TripodLoopRobot extends AWalker{
                 chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
                 chromosomes[c][i] = (2 * Math.PI + chromosomes[c][i]) % (2 * Math.PI);
             }
-            
+
         } else {
             chromosomes[c][i] += Math.random() - 0.5;
             chromosomes[c][i] = clamp(-12, chromosomes[c][i], 12);
         }
     }
-    
+
     @Override
     protected void mutateCritical(int c, int i) {
         if (c < LEGS) {
@@ -124,32 +119,37 @@ public class TripodLoopRobot extends AWalker{
 
         double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
         double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
-        
-        double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
-        double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
-        
+
+        double sinAY = Math.sin(((leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
+        double cosAY = Math.cos(((leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
+
         double sinX = Math.sin(chromosomes[C_ROTATION][0]);
         double cosX = Math.cos(chromosomes[C_ROTATION][0]);
-        
-        double ty = -chromosomes[C_Y_OFFSET][0] + sinX * Math.cos(-( (leg * 60 + 30) / 180. * Math.PI) - chromosomes[C_ROTATION][1]) * A;
-        
+
+        double ty = -chromosomes[C_Y_OFFSET][0] + sinX * Math.cos(-((leg * 60 + 30) / 180. * Math.PI) - chromosomes[C_ROTATION][1]) * A;
+
         tx += cosA * posDiff.x + sinA * posDiff.z;
         tz += -sinA * posDiff.x + cosA * posDiff.z;
-        
+
         //TODO; mal mit Quaternions rechnen; vllt sind die da genauer?
         //INfo; ist glaube ich eher ein Rechenproblem
         //alternativ: bei der Bestimmung von rotHorizontal schauen, ob x und z nah bei 0 sind, wenn ja, aus den angrenzenden Winkeln interpolieren
-        
         Vector3d posAim = new Vector3d(
-            -(tx * cosAY * cosAY + tx * cosX - tx * cosX * cosAY * cosAY - sinAY * sinX * ty - tz * cosAY * sinAY + tz * sinAY * cosX * cosAY),
-            (sinAY * sinX * tx + cosX * ty + cosAY * sinX * tz),
-            (-tx * cosAY * sinAY + tx * sinAY * cosX * cosAY - cosAY * sinX * ty + tz - tz * cosAY * cosAY + tz * cosAY * cosAY * cosX)
-        );        
-        
-        if (posAim.x < 0.000001 && posAim.x > -0.000001) posAim.x = 0;
-        if (posAim.y < 0.000001 && posAim.y > -0.000001) posAim.y = 0;
-        if (posAim.z < 0.000001 && posAim.z > -0.000001) posAim.z = 0;
-        
+                -(tx * cosAY * cosAY + tx * cosX - tx * cosX * cosAY * cosAY - sinAY * sinX * ty - tz * cosAY * sinAY + tz * sinAY * cosX * cosAY),
+                (sinAY * sinX * tx + cosX * ty + cosAY * sinX * tz),
+                (-tx * cosAY * sinAY + tx * sinAY * cosX * cosAY - cosAY * sinX * ty + tz - tz * cosAY * cosAY + tz * cosAY * cosAY * cosX)
+        );
+
+        if (posAim.x < 0.000001 && posAim.x > -0.000001) {
+            posAim.x = 0;
+        }
+        if (posAim.y < 0.000001 && posAim.y > -0.000001) {
+            posAim.y = 0;
+        }
+        if (posAim.z < 0.000001 && posAim.z > -0.000001) {
+            posAim.z = 0;
+        }
+
         inverseKinematics(leg, posAim);
     }
 
@@ -165,9 +165,8 @@ public class TripodLoopRobot extends AWalker{
         double cosB = Math.cos(rotHorizontal[leg]);
 
         Vector3d dummy = new Vector3d(L1 * sinB, 0, L1 * cosB);
-        
-        //if (leg == 5) System.out.println("Dummy:" + dummy);
 
+        //if (leg == 5) System.out.println("Dummy:" + dummy);
         //Beine anpassen
         double distSquared = dummy.distanceSquared(posAim);
         double dist = Math.sqrt(distSquared);
@@ -175,24 +174,19 @@ public class TripodLoopRobot extends AWalker{
         double angleBody = Math.acos((L3 * L3 - distSquared - L2 * L2) / (-2 * dist * L2));
 
         //if (leg == 5) System.out.println("Dist:" + dist);
-        
         //if (leg == 5) System.out.println("Anglebody:" + angleBody * 180 / Math.PI);
-        
         /*
         if (angleBody == Double.NaN) {
             return false;
         }
          */
-        
-        
         double downAngle = Math.asin((posAim.y - dummy.y) / (dist));
 
         if (dummy.z > posAim.z) {
             downAngle = Math.PI - downAngle;
         }
-        
+
         //if (leg == 5) System.out.println("Downangle:" + (downAngle * 180 / Math.PI));
-        
         rotTop[leg] = (8 * Math.PI - (angleBody + downAngle)) % (2 * Math.PI);
 
         double sinC = Math.sin(rotTop[leg]);
@@ -213,31 +207,37 @@ public class TripodLoopRobot extends AWalker{
 
         double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
         double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
-        
-        double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
-        double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
-        
+
+        double sinAY = Math.sin(((leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
+        double cosAY = Math.cos(((leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
+
         double sinX = Math.sin(chromosomes[C_ROTATION][0]);
         double cosX = Math.cos(chromosomes[C_ROTATION][0]);
-        
-        double ty = -chromosomes[C_Y_OFFSET][0] + sinX * Math.cos(-( (leg * 60 + 30) / 180. * Math.PI) - chromosomes[C_ROTATION][1]) * A;
-        
+
+        double ty = -chromosomes[C_Y_OFFSET][0] + sinX * Math.cos(-((leg * 60 + 30) / 180. * Math.PI) - chromosomes[C_ROTATION][1]) * A;
+
         tx += cosA * posDiff.x + sinA * posDiff.z;
         ty += 0.5 * Math.sin(t * 2 * Math.PI);
         tz += -sinA * posDiff.x + cosA * posDiff.z;
-        
+
         Vector3d posAim = new Vector3d(
-            -(tx * cosAY * cosAY + tx * cosX - tx * cosX * cosAY * cosAY - sinAY * sinX * ty - tz * cosAY * sinAY + tz * sinAY * cosX * cosAY),
-            (sinAY * sinX * tx + cosX * ty + cosAY * sinX * tz),
-            (-tx * cosAY * sinAY + tx * sinAY * cosX * cosAY - cosAY * sinX * ty + tz - tz * cosAY * cosAY + tz * cosAY * cosAY * cosX)
+                -(tx * cosAY * cosAY + tx * cosX - tx * cosX * cosAY * cosAY - sinAY * sinX * ty - tz * cosAY * sinAY + tz * sinAY * cosX * cosAY),
+                (sinAY * sinX * tx + cosX * ty + cosAY * sinX * tz),
+                (-tx * cosAY * sinAY + tx * sinAY * cosX * cosAY - cosAY * sinX * ty + tz - tz * cosAY * cosAY + tz * cosAY * cosAY * cosX)
         );
-        
-        if (posAim.x < 0.000001 && posAim.x > -0.000001) posAim.x = 0;
-        if (posAim.y < 0.000001 && posAim.y > -0.000001) posAim.y = 0;
-        if (posAim.z < 0.000001 && posAim.z > -0.000001) posAim.z = 0;
-        
+
+        if (posAim.x < 0.000001 && posAim.x > -0.000001) {
+            posAim.x = 0;
+        }
+        if (posAim.y < 0.000001 && posAim.y > -0.000001) {
+            posAim.y = 0;
+        }
+        if (posAim.z < 0.000001 && posAim.z > -0.000001) {
+            posAim.z = 0;
+        }
+
         inverseKinematics(leg, posAim);
-        
+
         /*
         Vector3d posAim = new Vector3d(chromosomes[leg][G_X], -chromosomes[C_Y_OFFSET][0], chromosomes[leg][G_Z]);
 
@@ -248,22 +248,22 @@ public class TripodLoopRobot extends AWalker{
         posAim.addLocal(cosA * posDiff.x + sinA * posDiff.z, posDiff.y + 0.5 * Math.sin(t * 2 * Math.PI), -sinA * posDiff.x + cosA * posDiff.z);
 
         inverseKinematics(leg, posAim);
-        */
+         */
     }
 
     @Override
     public void setRotation(double t) {
         if (t < 0.5) {
             setDistance(t);
-            inverseKinematics(0);            
+            inverseKinematics(0);
             inverseKinematics(2);
             inverseKinematics(4);
-            
+
             setDistance(-t);
             moveBack(1, t);
             moveBack(3, t);
             moveBack(5, t);
-            
+
         } else {
             setDistance(1 - t);
             moveBack(0, t - 0.5);
@@ -276,22 +276,22 @@ public class TripodLoopRobot extends AWalker{
             inverseKinematics(5);
         }
     }
-    
+
     @Override
     public double getStartHeight() {
         return chromosomes[C_Y_OFFSET][0];
     }
-    
+
     @Override
     public double[] getDirection() {
         return chromosomes[C_TRANSLATION];
     }
-    
+
     @Override
     public double[] getStartRotation() {
         return chromosomes[C_ROTATION];
     }
-    
+
     @Override
     public double getRotationAngle() {
         return 0;
@@ -318,8 +318,7 @@ public class TripodLoopRobot extends AWalker{
             {0, 0},
             {0},
             {0, 0},
-            {0, 0},
-        };
+            {0, 0},};
     }
 
 }

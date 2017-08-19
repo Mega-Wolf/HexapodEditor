@@ -123,6 +123,8 @@ public abstract class AWalker {
             noIntersection();
             checkUgly(i);
 
+            //System.out.println(posBottom[5]);
+            
             if (fitness == 0) {
                 fitnessFunction.calcFitnessValueEveryFrame(this);
             }

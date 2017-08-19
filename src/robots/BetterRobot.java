@@ -1,19 +1,16 @@
 //Tripod :[[-1.432821159681283, 4.502035344895974], [-0.40891439891937764, -0.6651818060981322], [2.9375258559642132, 1.7361534800301865], [-1.2600145447558977, 4.392344095316288], [-1.576993487322087, 0.8825759780361142], [2.1821855758332025, 2.1825797407084107], [0.9442307092252811], [0.026254282811909353, 2.068521330609688], [6.685559340073908, 8.0]]	Fitness: 14.685559340073908
 package robots;
 
-import robots.AWalker;
 import math.Vector3d;
 
 /**
  * A robot which can loop animations with Inverse Kinematics, the end state must
  * be the beginning state
+ * By contrast to TripodLoopRobot, this robot can also rotate (around the y-axis)
  *
  * @author Tobias
  */
 public class BetterRobot extends AWalker{
-
-    /* TODOS */
-    // maybe add speed later on
 
     /* Consts */
     
@@ -34,13 +31,15 @@ public class BetterRobot extends AWalker{
 
     private Vector3d posDiff;
 
-    /* Constructor */
+    /* Constructors */
     
     /**
-     * Creates a default TripodLoopRobot; Not good but allowed
+     * Creates a default BetterRobot
+     * 
+     * @param mutate whether the robot is a random one or the default one
      */
-    public BetterRobot() {
-        super();
+    public BetterRobot(boolean mutate) {
+        super(mutate);
     }
 
     /**
@@ -71,11 +70,6 @@ public class BetterRobot extends AWalker{
 
     @Override
     protected void mutateNormal(int c, int i) {        
-        
-        if (false) {
-            return;
-        }
-        
         if (c < LEGS) {
             chromosomes[c][i] += Math.random() - 0.5;
             //chromosomes[c][i] = clamp(-8, chromosomes[c][i], 8);
@@ -98,16 +92,10 @@ public class BetterRobot extends AWalker{
             chromosomes[c][i] += Math.random() - 0.5;
             //chromosomes[c][i] = clamp(-12, chromosomes[c][i], 12);
         }
-        
     }
     
     @Override
     protected void mutateCritical(int c, int i) {
-        
-        if (false) {
-            return;
-        }
-        
         if (c < LEGS) {
             chromosomes[c][i] = Math.random() * 16 - 8;
         } else if (c == C_Y_OFFSET) {
@@ -124,6 +112,7 @@ public class BetterRobot extends AWalker{
         else {
             chromosomes[c][i] = Math.random() * 24 - 12;
         } 
+        
     }
 
     /**
@@ -240,8 +229,8 @@ public class BetterRobot extends AWalker{
         double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
         double tz = -1 -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
         
-        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0]);
-        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0]);
+        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI /*+ chromosomes[C_MOVE_ROTATION][0]*/);
+        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI /*+ chromosomes[C_MOVE_ROTATION][0]*/);
         
         double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
         double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
@@ -256,8 +245,8 @@ public class BetterRobot extends AWalker{
         tz += -sinA * posDiff.x + cosA * posDiff.z;
         
         
-        double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
-        double rotCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0]);
+        //double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
+        //double rotCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0]);
         
         //double rotSinA = Math.sin(0);
         //double rotCosA = Math.cos(0);
@@ -265,8 +254,8 @@ public class BetterRobot extends AWalker{
         //double rotSinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
         //double rotCosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
         
-        tx += correctT * (rotCosA * chromosomes[leg][G_X] + rotSinA * chromosomes[leg][G_Z]);
-        tz += correctT * (-rotSinA * chromosomes[leg][G_X] + rotCosA * chromosomes[leg][G_Z]);
+        //tx += correctT * (rotCosA * chromosomes[leg][G_X] + rotSinA * chromosomes[leg][G_Z]);
+        //tz += correctT * (-rotSinA * chromosomes[leg][G_X] + rotCosA * chromosomes[leg][G_Z]);
         
         
         Vector3d posAim = new Vector3d(
@@ -299,26 +288,30 @@ public class BetterRobot extends AWalker{
     @Override
     public void setRotation(double t) {
         
-        correctT = t;
+        //correctT = t;
 
         if (t < 0.5) {
             setDistance(t);
+            correctT = t;
             inverseKinematics(0);            
             inverseKinematics(2);
             inverseKinematics(4);
             
             setDistance(-t);
+            correctT = -t;
             moveBack(1, t);
             moveBack(3, t);
             moveBack(5, t);
             
         } else {
             setDistance(1 - t);
+            correctT = 1 - t;         
             moveBack(0, t - 0.5);
             moveBack(2, t - 0.5);
             moveBack(4, t - 0.5);
 
             setDistance(-1 + t);
+            correctT = -1 + t;
             inverseKinematics(1);
             inverseKinematics(3);
             inverseKinematics(5);
@@ -347,7 +340,7 @@ public class BetterRobot extends AWalker{
 
     @Override
     public AWalker newInstance() {
-        return new BetterRobot();
+        return new BetterRobot(true);
     }
 
     @Override
@@ -380,7 +373,7 @@ public class BetterRobot extends AWalker{
             {0},
             {0, 0},
             {0, 0},
-            {Math.PI }
+            {0 }
         };
     }
 

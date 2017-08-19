@@ -15,8 +15,9 @@ import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import fitnesses.FHideExtended;
+import fitnesses.FRotate;
 import fitnesses.IFitness;
+import robots.BetterRobot;
 
 public class Main extends SimpleApplication {
 
@@ -25,8 +26,6 @@ public class Main extends SimpleApplication {
     Population population;
 
     public static void main(String[] args) {
-
-        
         
         //    System.out.println(Math.sin(45/180f*Math.PI) * Math.sin(45/180f*Math.PI));
         //    System.exit(0);
@@ -199,19 +198,17 @@ public class Main extends SimpleApplication {
         fitnessText.setLocalTranslation(300, fitnessText.getLineHeight(), 0);
         fitnessText.setColor(new ColorRGBA(0.5f,0,0,1));
         
-        
-        
         guiNode.attachChild(fitnessText);
         
-        //IFitness fitness = new FRotate();
+        IFitness fitness = new FRotate();
         //IFitness fitness = new FFarthestMove();
         //IFitness fitness = new FHide();
-        IFitness fitness = new FHideExtended();
+        //IFitness fitness = new FHideExtended();
         //IFitness fitness = new FLateral();
         //IFitness fitness = new FHigh();
             
-        AWalker luca = new TripodLoopRobot();
-        //AWalker luca = new BetterRobot();
+        //AWalker luca = new TripodLoopRobot(false);
+        AWalker luca = new BetterRobot(false);
         population = new Population(luca, fitness);
         
         Thread thread = new Thread(() -> {
@@ -303,7 +300,8 @@ public class Main extends SimpleApplication {
         
         if (sum == 0) {
             
-            walker = population.getBest();
+            walker = population.getBest();                    
+
             int number = population.getBestRobots().size() - 1;
             
             //walker = t;
@@ -312,7 +310,7 @@ public class Main extends SimpleApplication {
             }
             
             fitnessText.setText("Fitness: " + walker.getFitness() +
-                    "          Generation: " + (number * 10) + 
+                    "          Generation: " + (number) + 
                     "          Movement total: " + Math.sqrt(walker.getDirection()[0] * walker.getDirection()[0] + walker.getDirection()[1] * walker.getDirection()[1]) + 
                     "          (Movement ahead: " + walker.getDirection()[1] + 
                     "          Movement lateral: " + walker.getDirection()[0] + ")");

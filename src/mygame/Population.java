@@ -101,11 +101,14 @@ public class Population {
                 lowestFail = population[0].getFitness();
             }
 
+            bestRobots.add(population[0]);
+            
+            /*
             if (loop % 10 == 0) {
                 //System.out.println(lowestFail + "," + population[0].getFitness() + "," + population[POPULATION_SIZE - 1].getFitness());
-                System.out.println(population[0].getFitness());
-                bestRobots.add(population[0]);
+                System.out.println(population[0].getFitness());    
             }
+            */
             
             if (loop > 1500) {
                 break;
