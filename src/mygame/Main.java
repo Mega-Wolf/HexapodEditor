@@ -1,32 +1,36 @@
 package mygame;
 
+import robots.TripodLoopRobot;
+import robots.AWalker;
+import visuals.Robot;
 import com.jme3.app.SimpleApplication;
+import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import java.util.Arrays;
-import java.util.Random;
-import test.Stick;
+import fitnesses.FRotate;
+import fitnesses.IFitness;
+import robots.BetterRobot;
 
-/**
- * This is the Main Class of your Game. You should only do initialization here.
- * Move your Logic into AppStates or Controls
- *
- * @author normenhansen
- */
-public strictfp class Main extends SimpleApplication {
+public class Main extends SimpleApplication {
 
     boolean finished;
-    GeneticRobot finishedGR;
     
-    public static void main(String[] args) {
+    Population population;
 
+    public static void main(String[] args) {
+        
         //    System.out.println(Math.sin(45/180f*Math.PI) * Math.sin(45/180f*Math.PI));
         //    System.exit(0);
+        
+        {
         /*
         long start = System.currentTimeMillis();
         float f = 0;
@@ -114,207 +118,237 @@ public strictfp class Main extends SimpleApplication {
         
         
         System.exit(0);
-         */
-
+            */
+        }
+        
+        
+        /*
+        
+        double[][] chroms = {
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {0, 3},
+            {1},
+            {0, 0},
+            {0, 3},
+        };
+        
+       
+        t = new TripodLoopRobot(chroms);
+        
+        
+        Vector3d[][] jointSolid = new Vector3d[30][6];
+        Vector3d[][] jointHorizontal = new Vector3d[30][6];
+        Vector3d[][] jointTop = new Vector3d[30][6];
+        Vector3d[][] jointBottom = new Vector3d[30][6];
+        
+        Vector3d[] jointWeapon = new Vector3d[30];
+        
+        double[][] rotHorizontal = new double[30][6];
+        double[][] rotTop = new double[30][6];
+	double[][] rotBottom = new double[30][6];
+        
+        double initialHeight = 1;
+        double endHeight = 1;
+        double initialRotation = 0;
+        double endRotation = 0;
+	int frames = 30;
+        
+        for (int i = 0; i < 30; i++) {
+            t.setRotation(i / 30.0);
+            
+            jointSolid[i] = t.posSolid;
+            jointHorizontal[i] = t.posHorizontal;
+            jointTop[i] = t.posTop;
+            jointBottom[i] = t.posBottom;
+            
+            //jointWeapon = t.
+            
+            
+            
+        }
+        
+        */
+        
+        
+         
         Main app = new Main();
-
         app.start();
     }
 
     Robot robot;
-    Stick stick;
+    
+    BitmapText fitnessText;
 
     @Override
     public void simpleInitApp() {
-        /*
-        Geometry geom = Hexagon.create3DHexagon(1, 0.3f);
-
-        robot = new Robot((SimpleApplication) this);
-        rootNode.attachChild(robot.robotNode);
-
-        // stick = new Stick((SimpleApplication) this);
-        //  rootNode.attachChild(stick.stickMiddle);
-        robot.testGA();
         
-        */
+        viewPort.setBackgroundColor(new ColorRGBA(0, 0.6f, 0.9f , 1));
+        
+        //setDisplayStatView(false); setDisplayFps(false);
+        
+        fitnessText = new BitmapText(guiFont, false);
+        fitnessText.setQueueBucket(Bucket.Gui);
+        
+        fitnessText.setSize(guiFont.getCharSet().getRenderedSize());
+        fitnessText.setText("Fitness: ");
+        fitnessText.setLocalTranslation(300, fitnessText.getLineHeight(), 0);
+        fitnessText.setColor(new ColorRGBA(0.5f,0,0,1));
+        
+        guiNode.attachChild(fitnessText);
+        
+        IFitness fitness = new FRotate();
+        //IFitness fitness = new FFarthestMove();
+        //IFitness fitness = new FHide();
+        //IFitness fitness = new FHideExtended();
+        //IFitness fitness = new FLateral();
+        //IFitness fitness = new FHigh();
+            
+        //AWalker luca = new TripodLoopRobot(false);
+        AWalker luca = new BetterRobot(false);
+        population = new Population(luca, fitness);
+        
+        Thread thread = new Thread(() -> {
+            while(true) {
+                population.testGA();
+            }
+         });
+         
+        thread.start();
+        
+        rootNode.scale(0.2f);
         
         Quad q = new Quad(100, 100);
-        Geometry ggg = new Geometry("", q);
-        
+        Geometry groundGeometry = new Geometry("", q);
+
         Material matSphere = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        matSphere.setColor("Color", ColorRGBA.Green);
-        
-        ggg.setMaterial(matSphere);
-        
-        rootNode.attachChild(ggg);
-        ggg.setLocalRotation(new Quaternion(new float[]{-FastMath.PI / 2,0,0}));
-        ggg.setLocalTranslation(-50, -1 - 0.2f, 50);
-        
+        matSphere.setColor("Color", new ColorRGBA(0.1f,0.7f,0.2f,1f));
+
+        groundGeometry.setMaterial(matSphere);
+
+        rootNode.attachChild(groundGeometry);
+        groundGeometry.setLocalRotation(new Quaternion(new float[]{-FastMath.PI / 2, 0, 0}));
+        groundGeometry.setLocalTranslation(-50, - 0.2f, 50);
+
         robot = new Robot((SimpleApplication) this);
-        rootNode.attachChild(robot.robotNode);
+        
+        robotOuterNode.attachChild(robot.getRobotNode());
+        
+        rootNode.attachChild(robotOuterNode);
         //testGA();
-        g = new GeneticIK(new double[][] {
-            {0,0,3},
-            {0,-1,3},
-            {0,-1,3},
-            {0,-1,3},
-            {0,-1,3},
-            {0,-0.5,3},
-            //{0,0.5,3},
-            //{0,0,3},
-            {0,0,3},
-            {0,0,0}
+
+        //double x = Math.PI / 6;
+        //double y = Math.PI / 6;
+
+        /*
+        walker = new TripodLoopRobot(new double[][] {
+            {1.6029845816266275, 3.8782624074324796},
+            {-1.3177250565539262, 1.9310578477958016},
+            {0.10909108724059657, -0.17897369039648914},
+            {1.6117042552357883, 3.8678671527501587},
+            {-2.5209010830038876, 2.628952956790129},
+            {0.15843137767931514, -0.1334882752926867},
+            {2.017518427871427},
+            {-0.011466739897852962, 1.1312599238230865},
+            {1.0962633061456208, 8.742270477740323}
         });
+        */
         
-        //g.setStartRotation();
-        //robot.setRotation(g, 0.4999);
+        /*
+        g = new TripodLoopRobot(new double[][] {
+            {0,3},
+            {0,3},
+            {0,3},
+            {0,3},
+            {0,3},
+            {0,3},
+            {1},
+            {x,y},
+            {0,3}
+        });
+         */
+        //robot.setRotation(walker, 0);
+        //g.calcFitness(0);
+        //System.out.println(walker);
+
+        // System.exit(0);
+        //robot.robotNode.rotateUpTo(new Vector3f((float) (Math.sin(-y) * Math.sin(x)) , (float) Math.cos(x), (float) (Math.cos(-y) * Math.sin(x)) ));     
+        //robot.robotNode.rotate((float) (Math.sin(-y) * Math.sin(x)) , (float) Math.cos(x), (float) (Math.cos(-y) * Math.sin(x)) ); 
+        //robot.robotNode.rotate((float) x, (float) -y,0);
         
+
+//        g.calcFitness();
+        //      System.out.println("Fitenss: " + g.getFitness());
     }
 
     float sum = 0;
-    GeneticIK g;
+    AWalker walker;
     
+    Node robotOuterNode = new Node();
+
     @Override
     public void simpleUpdate(float tpf) {
-        
-        sum += tpf / 5.;
-        robot.setRotation(g,sum % 1.);
-        //robot.robotNode.setLocalTranslation(sum, -sum / 2, -sum / 3);
-        //robot.robotNode.setLocalTranslation(0, (sum % 1) * 0.5f, (sum % 1) * 3);
-        robot.robotNode.setLocalTranslation(0, 0, sum * 3);
-        //robot.robotNode.setLocalTranslation(0, (sum % 1) * 0.5f, 0);
-        
-        /*
-        if (sum >= 1) {
-            System.exit(0);
-        }
-        */
-        
-        //robot.robotNode.move(tpf / 5f, 0, 0);
-        
-        
-        
-        /*if (finished) {
-            sum += tpf;
-            //robot.setRotation(finishedGR, sum);
-        }*/
 
         /*
-        sum += tpf;
-        
-        if (sum > 1/Stick.FPS) {
-            sum -= 1/Stick.FPS;
-        //    robot.downAngles[4] -= 1;
-        //    robot.updateRotations();
-        stick.tick();
-        }
+        //sum += tpf / 5.;
+        sum += tpf ;
+        robot.setRotation(g, ((int) sum * 1f / 30f) % 1. );
          */
+        
+        if (sum == 0) {
+            
+            walker = population.getBest();                    
+
+            int number = population.getBestRobots().size() - 1;
+            
+            //walker = t;
+            if (walker == null) {
+                return;
+            }
+            
+            fitnessText.setText("Fitness: " + walker.getFitness() +
+                    "          Generation: " + (number) + 
+                    "          Movement total: " + Math.sqrt(walker.getDirection()[0] * walker.getDirection()[0] + walker.getDirection()[1] * walker.getDirection()[1]) + 
+                    "          (Movement ahead: " + walker.getDirection()[1] + 
+                    "          Movement lateral: " + walker.getDirection()[0] + ")");
+            
+            robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
+            
+            System.out.println("Took this: " + walker);
+            
+            robot.getRobotNode().rotate(0, (float) -walker.getStartRotation()[1], 0);
+            robot.getRobotNode().rotate((float) walker.getStartRotation()[0], 0, 0);
+            robot.getRobotNode().rotate(0, (float) walker.getStartRotation()[1], 0);
+        }
+        
+        /*
+        for (int i = 0; i < 30; i++) {
+            robot.setRotation(walker, i / 30f);
+        }
+        System.exit(0);
+        */
+        
+        //robot.setRotation(walker, ((int) (10 * sum) * 1f / 30f) % 1.);
+        //robot.robotNode.setLocalTranslation(((int) (10 * sum) * 1f / 30f) % 1f * (float) walker.getDirection()[0], (float) walker.getHeight(), ((int) (10 * sum) * 1f / 30f) % 1f * (float) walker.getDirection()[1]);
+        
+        robot.setRotation(walker, sum % 1.);
+        robotOuterNode.setLocalTranslation(sum * (float) walker.getDirection()[0], (float) walker.getStartHeight(), sum * (float) walker.getDirection()[1]);
+        robotOuterNode.setLocalRotation(new Quaternion(new float[] {0, sum * (float) walker.getRotationAngle(), 0}));
+        
+        
+        sum += tpf  / 2.  ;
+        if (sum > 2) {
+        //if (sum > 20) {
+            sum = 0;
+        }
     }
 
     @Override
     public void simpleRender(RenderManager rm) {
         //TODO: add render code
     }
-    
-    public void testGA() {
 
-        int POPULATION_SIZE = 128;
-
-        int found = 0;
-        int loop = 0;
-        double lowestFail = -9999999999f;
-
-        /*
-        int index = 0;
-        int[] lookUpPop = new int[(POPULATION_SIZE / 2) * (POPULATION_SIZE + 1)];
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            for (int j = 0; j < (POPULATION_SIZE - i); j++) {
-                lookUpPop[index] = i;
-                index++;
-            }
-        }
-         */
-        boolean running = true;
-
-        GeneticRobot population[] = new GeneticRobot[POPULATION_SIZE];
-        GeneticRobot populationDummy[] = new GeneticRobot[POPULATION_SIZE];
-        for (int i = 0; i < POPULATION_SIZE; i++) {
-            populationDummy[i] = new GeneticRobot();
-        }
-
-        while (running) {
-            //GeneticRobot.TOLERANCE = Math.max(0.5 - loop / 10000.,0);
-            
-            loop++;
-
-            System.arraycopy(populationDummy, 0, population, 0, POPULATION_SIZE);
-
-            for (int i = 0; i < POPULATION_SIZE; i++) {
-                population[i].calcFitness();
-            }
-
-            shuffleArray(population);
-            Arrays.sort(population, (e1, e2) -> Double.compare(e2.fitness, e1.fitness));
-
-            for (int i = 0; i < POPULATION_SIZE; i++) {
-                int i1 = 0;
-                int i2 = 0;
-
-                while (Math.random() < 0.5) {
-                    i1++;
-                    if (i1 == POPULATION_SIZE - 1) {
-                        break;
-                    }
-                }
-
-                while (Math.random() < 0.5) {
-                    i2++;
-                    if (i2 == POPULATION_SIZE - 1) {
-                        break;
-                    }
-                }
-                //int i1 = lookUpPop[(int) (Math.random() * 513*256)];
-                //int i2 = lookUpPop[(int) (Math.random() * 513*256)];
-                populationDummy[i] = new GeneticRobot(population[i1], population[i2]);
-            }
-
-            if (population[0].fitness > lowestFail) {
-                lowestFail = population[0].fitness;
-            }
-
-            if (loop % 100 == 0) {
-                System.out.println(lowestFail + "," + population[0].fitness + "," + population[POPULATION_SIZE - 1].fitness);
-            }
-
-            if (loop > 10_000) {
-                System.out.println("Finished, round: " + loop);
-                System.out.println("Loop: " + loop + ", Found: " + found + ", best Fail: " + lowestFail);
-                System.out.println(population[0]);
-                //System.exit(0);
-
-                finished = true;
-                finishedGR = population[0];
-
-                break;
-
-            }
-
-            if (loop % 1000 == 0) {
-                System.out.println("Loop: " + loop + ", Found: " + found + ", best Fail: " + lowestFail);
-                System.out.println(population[0]);
-            }
-        }
-    }
-    
-    private static void shuffleArray(GeneticRobot[] array) {
-        int index;
-        GeneticRobot temp;
-        Random random = new Random();
-        for (int i = array.length - 1; i > 0; i--) {
-            index = random.nextInt(i + 1);
-            temp = array[index];
-            array[index] = array[i];
-            array[i] = temp;
-        }
-    }
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package test;
+package legacy;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
@@ -14,7 +14,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
 import com.jme3.scene.shape.Sphere;
-import mygame.Hexagon;
+import visuals.Hexagon;
 
 /**
  *

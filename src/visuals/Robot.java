@@ -1,10 +1,9 @@
-// [[21.21875, 310.6875, 34.25, -10.0, -10.0, 10.0], [20.03125, 338.40625, 335.90625, -10.0, 10.0, -8.03125], [20.28125, 339.8125, 317.5, 10.0, 10.0, -2.46875]]
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mygame;
+package visuals;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
@@ -15,45 +14,47 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Sphere;
+import robots.AWalker;
 
 /**
- *
+ * 3D representation of the robot in the scene
  * @author Tobias
  */
-public strictfp class Robot {
+public class Robot {
 
-    SimpleApplication app;
+    private final SimpleApplication app;
 
-    //Params
-    // Vector3f position = new Vector3f(0,0,0);
-    // Quaternion rotation = new Quaternion();
     //Nodes
-    Node robotNode;
-    Node[] nodeSolid = new Node[6];
-    Node[] nodeHorizontal = new Node[6];
-    Node[] nodeTop = new Node[6];
-    Node[] nodeBottom = new Node[6];
+    private final Node robotNode;
+    private final Node[] nodeSolid = new Node[6];
+    private final Node[] nodeHorizontal = new Node[6];
+    private final Node[] nodeTop = new Node[6];
+    private final Node[] nodeBottom = new Node[6];
 
     //Geometries
-    Geometry body;
+    private final Geometry body;
 
-    Geometry[] horizontalHex = new Geometry[6];
-    Geometry[] upHex = new Geometry[6];
-    Geometry[] downHex = new Geometry[6];
+    private final Geometry[] horizontalHex = new Geometry[6];
+    private final Geometry[] upHex = new Geometry[6];
+    private final Geometry[] downHex = new Geometry[6];
 
-    Geometry[] jointSolid = new Geometry[6];
-    Geometry[] jointHorizontal = new Geometry[6];
-    Geometry[] jointTop = new Geometry[6];
-    Geometry[] jointBottom = new Geometry[6];
+    private final Geometry[] jointSolid = new Geometry[6];
+    private final Geometry[] jointHorizontal = new Geometry[6];
+    private final Geometry[] jointTop = new Geometry[6];
+    private final Geometry[] jointBottom = new Geometry[6];
 
-    Geometry sphereSpecial;
+    private final Geometry sphereSpecial;
     
     //angles
-    float[] horizontalAngles = {0, 0, 0, 0, 0, 0};
-    float[] upAngles = {-60 / 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI};
-    float[] downAngles = {120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI};
+    private final float[] horizontalAngles = {0, 0, 0, 0, 0, 0};
+    private final float[] upAngles = {-60 / 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI};
+    private final float[] downAngles = {120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI};
+    /* Constructor */
     
-    //touching stuff
+    /**
+     * Creates a 3d model of the robot
+     * @param app 
+     */
     public Robot(SimpleApplication app) {
         this.app = app;
 
@@ -85,14 +86,7 @@ public strictfp class Robot {
 
             nodeSolid[i].rotate(0, (i * 60 + 30) / 180f * FastMath.PI, 0);
             jointSolid[i].setLocalTranslation(0, 0, 1);
-        }
-        
-        //robotNode.detachChild(nodeSolid[1]);
-        //robotNode.detachChild(nodeSolid[2]);
-        //robotNode.detachChild(nodeSolid[3]);
-        //robotNode.detachChild(nodeSolid[4]);
-        //robotNode.detachChild(nodeSolid[5]);
-        
+        }    
         
         Geometry gHorHex = Hexagon.create3DHexagon(0.15f, 0.5f);
 
@@ -171,26 +165,22 @@ public strictfp class Robot {
         
         robotNode.attachChild(sphereSpecial);
         
-        sphereSpecial.setLocalTranslation(0, 0, 1);
-        
+        sphereSpecial.setLocalTranslation(0, 0, 1);  
         updateRotations();
 
         //center();
     }
 
+    /**
+     * Sets the rotations
+     */
     public void updateRotations() {
-        for (int i = 0; i < DNA.LEGS; i++) {
-            
-            // [0, 360)
-            //nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i] / 180f * FastMath.PI, 0}));
-            //nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i] / 180f * FastMath.PI, 0, 0}));
-            //nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i] / 180f * FastMath.PI, 0, 0}));
-            
+        for (int i = 0; i < AWalker.LEGS; i++) {        
             // [0, 2 * PI)
             nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i], 0}));
             nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i], 0, 0}));
             nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i], 0, 0}));
-        }
+        }    
     }
 
     //Geometry centerGeometry;
@@ -226,34 +216,26 @@ public strictfp class Robot {
         return center;
         //centerGeometry.setLocalTranslation(center);
     }
+    
+    /* Getter */
 
-    int naturalMutation;
+    public Node getRobotNode(){
+        return robotNode;
+    }
 
-    public void setRotation(GeneticIK g, double t) {
-        
-        //sphereSpecial.setLocalTranslation((float)GeneticIK.posAim.x + FastMath.sin(2/3f * FastMath.PI), (float)GeneticIK.posAim.y, (float)GeneticIK.posAim.z + FastMath.cos(2/3f * FastMath.PI));
-        //sphereSpecial.setLocalTranslation((float)GeneticIK.posAimDebug.x, (float)GeneticIK.posAimDebug.y, (float)GeneticIK.posAimDebug.z + 1);
-        
-        
-        //TODO
+    /* Setter */
+    
+    /**
+     * Gets the rotations from the associated AWalker
+     * @param g The associated robot
+     * @param t The time in the cycle (0 <= t < 1)
+     */
+    public void setRotation(AWalker g, double t) {
         g.setRotation(t);
-        
-        for (int c = 0; c < DNA.LEGS; c++) {
-            horizontalAngles[c] = (float) g.rotHorizontal[c];
-            upAngles[c] = (float) g.rotTop[c];
-            downAngles[c] = (float) g.rotBottom[c];
-            
-            
-            
-            /*
-            horizontalAngles[c] = (float) (gr.chromosomes[c][A_HORIZONTAL] + gr.chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_HORIZONTAL]));
-            upAngles[c] = (float) (gr.chromosomes[c][A_TOP] + gr.chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_TOP]));
-            downAngles[c] = (float) (gr.chromosomes[c][A_BOTTOM] + gr.chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_BOTTOM]));
-
-            horizontalAngles[LEGS - 1 - c] = (float) (-gr.chromosomes[c][A_HORIZONTAL] + gr.chromosomes[c][B_HORIZONTAL] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_HORIZONTAL]));
-            upAngles[LEGS - 1 - c] = (float) (gr.chromosomes[c][A_TOP] - gr.chromosomes[c][B_TOP] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_TOP]));
-            downAngles[LEGS - 1 - c] = (float) (gr.chromosomes[c][A_BOTTOM] - gr.chromosomes[c][B_BOTTOM] * Math.sin(t * (2 * Math.PI) + gr.chromosomes[c][GeneticRobot.PHI_BOTTOM]));
-            */
+        for (int c = 0; c < AWalker.LEGS; c++) {
+            horizontalAngles[c] = (float) g.getRotHorizontal()[c];
+            upAngles[c] = (float) g.getRotTop()[c];
+            downAngles[c] = (float) g.getRotBottom()[c];
         }
         updateRotations();
     }
