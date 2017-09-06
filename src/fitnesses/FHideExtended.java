@@ -36,4 +36,13 @@ public class FHideExtended implements IFitness{
         }
     }
     
+    @Override
+    public String getName() {
+        return "Extended Hide";
+    }
+
+    @Override
+    public String getDescription() {
+        return "3 - highest point in cycle";
+    }
 }

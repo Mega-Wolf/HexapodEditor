@@ -20,21 +20,19 @@ import java.util.Random;
 public class Population {
     
     /* Variables */
-    
-    private final List<AWalker> bestRobots = Collections.synchronizedList(new ArrayList<>());
+    private final List<AWalker> bestRobots; // = Collections.synchronizedList(new ArrayList<>());
     private final IFitness fitness;
     private final AWalker luca;
     
     /* Constructor */
-    public Population(AWalker luca, IFitness fitness) {
+    public Population(AWalker luca, IFitness fitness, List<AWalker> bestRobots) {
         this.luca = luca;
         this.fitness = fitness;
+        this.bestRobots = bestRobots;
     }
     
     public void testGA() {
-
         System.out.println("Start NEW");
-
         
         bestRobots.clear();
 
@@ -53,9 +51,7 @@ public class Population {
             }
         }
          */
-        boolean running = true;
-
-        
+        boolean running = true;  
         
         AWalker population[] = new AWalker[POPULATION_SIZE];
         AWalker populationDummy[] = new AWalker[POPULATION_SIZE];
@@ -156,7 +152,7 @@ public class Population {
         }
     }
     
-    public AWalker getBest() {
+    public AWalker getLast() {
         if (bestRobots.isEmpty()) {
             return null;
         }

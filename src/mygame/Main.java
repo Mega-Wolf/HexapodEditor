@@ -1,9 +1,10 @@
 package mygame;
 
-import robots.TripodLoopRobot;
+import com.jme3.app.DebugKeysAppState;
 import robots.AWalker;
 import visuals.Robot;
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.StatsAppState;
 import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
@@ -17,14 +18,18 @@ import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
 import fitnesses.FRotate;
 import fitnesses.IFitness;
+import javafx.application.Application;
 import robots.BetterRobot;
+import thread.Output;
 
 public class Main extends SimpleApplication {
 
     boolean finished;
-    
-    Population population;
 
+    public Main() {
+        super( new StatsAppState(), new DebugKeysAppState() );
+    }
+    
     public static void main(String[] args) {
         
         //    System.out.println(Math.sin(45/180f*Math.PI) * Math.sin(45/180f*Math.PI));
@@ -186,6 +191,16 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         
+        setPauseOnLostFocus(false);
+        inputManager.setCursorVisible(true);
+        
+        
+        new Thread(() -> {
+            //Application.launch(Output.class, new String[0]);
+            Application.launch(Output.class, new String[0]);
+        }).start();
+        
+        
         viewPort.setBackgroundColor(new ColorRGBA(0, 0.6f, 0.9f , 1));
         
         //setDisplayStatView(false); setDisplayFps(false);
@@ -199,25 +214,6 @@ public class Main extends SimpleApplication {
         fitnessText.setColor(new ColorRGBA(0.5f,0,0,1));
         
         guiNode.attachChild(fitnessText);
-        
-        IFitness fitness = new FRotate();
-        //IFitness fitness = new FFarthestMove();
-        //IFitness fitness = new FHide();
-        //IFitness fitness = new FHideExtended();
-        //IFitness fitness = new FLateral();
-        //IFitness fitness = new FHigh();
-            
-        //AWalker luca = new TripodLoopRobot(false);
-        AWalker luca = new BetterRobot(false);
-        population = new Population(luca, fitness);
-        
-        Thread thread = new Thread(() -> {
-            while(true) {
-                population.testGA();
-            }
-         });
-         
-        thread.start();
         
         rootNode.scale(0.2f);
         
@@ -298,22 +294,30 @@ public class Main extends SimpleApplication {
         robot.setRotation(g, ((int) sum * 1f / 30f) % 1. );
          */
         
+        if (Output.getInsatnce() == null || Output.getInsatnce().getPopulation() == null) {
+            return;
+        }
+        
         if (sum == 0) {
             
-            walker = population.getBest();                    
+            walker = Output.getInsatnce().getPopulation().getLast();                    
 
-            int number = population.getBestRobots().size() - 1;
+            int number = Output.getInsatnce().getPopulation().getBestRobots().size() - 1;
             
             //walker = t;
             if (walker == null) {
                 return;
             }
             
+            Output.getInsatnce().choose(number);
+            
+            /*
             fitnessText.setText("Fitness: " + walker.getFitness() +
                     "          Generation: " + (number) + 
                     "          Movement total: " + Math.sqrt(walker.getDirection()[0] * walker.getDirection()[0] + walker.getDirection()[1] * walker.getDirection()[1]) + 
                     "          (Movement ahead: " + walker.getDirection()[1] + 
                     "          Movement lateral: " + walker.getDirection()[0] + ")");
+            */
             
             robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
             

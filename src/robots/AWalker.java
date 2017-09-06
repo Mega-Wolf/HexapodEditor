@@ -555,6 +555,16 @@ public abstract class AWalker {
     }
 
     /* Getter */
+    
+    /**
+     * Gets the chromosomes of the robot to show them to a viewer
+     * 
+     * @return the chromosomes of the robot with their genes in them
+     */
+    public double[][] getDNA() {
+        return chromosomes;
+    }
+    
     /**
      * Gets the horizontal rotation (rotation around body edges)
      *
@@ -667,6 +677,28 @@ public abstract class AWalker {
      */
     public abstract double getRotationAngle();
 
+    
+    /**
+     * Gets the name of this robot type
+     * 
+     * @return the name of the robot type
+     */
+    public abstract String getName();
+    
+    
+    /**
+     * Gets the description of the robot type
+     * 
+     * @return the description of the robot type
+     */
+    public abstract String getDescription();
+    
+    /**
+     * Gets Descriptions for all the genes
+     * @return 
+     */
+    public abstract String[][] getDNAInfo();
+    
     @Override
     public String toString() {
         return this.getClass() + ":" + Arrays.deepToString(chromosomes) + "\tFitness: " + fitness;

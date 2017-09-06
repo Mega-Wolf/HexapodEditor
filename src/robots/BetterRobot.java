@@ -347,6 +347,32 @@ public class BetterRobot extends AWalker{
     public AWalker newInstance(AWalker parent0, AWalker parent1) {
         return new BetterRobot(parent0, parent1);
     }
+    
+    @Override
+    public String getName() {
+        return "Rotatable Robot";
+    }
+
+    @Override
+    public String getDescription() {
+        return "A robot which uses a tripod gait for movement and has the possibility to rotate.";
+    }
+    
+    @Override
+    public String[][] getDNAInfo() {
+        return new String[][] {
+            {"Position - Leg 1"},
+            {"Position - Leg 2"},
+            {"Position - Leg 3"},
+            {"Position - Leg 4"},
+            {"Position - Leg 5"},
+            {"Position - Leg 6"},
+            {"Body Height"},
+            {"Orientation"},
+            {"Movement"},
+            {"Rotation during movement (around y-axis)"}
+        };
+    }
 
     @Override
     protected void setupChromosomes() {

@@ -22,6 +22,15 @@ public class FLateral implements IFitness{
     public void calcFitnessValueEveryFrame(AWalker walker) {
         //empty
     }
-    
+
+    @Override
+    public String getName() {
+        return "Lateral";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Lateral movement - main axis movement";
+    }
     
 }

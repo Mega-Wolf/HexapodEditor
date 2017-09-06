@@ -15,4 +15,8 @@ public interface IFitness {
     public void calcFitnessValue(AWalker walker);
     
     public void calcFitnessValueEveryFrame(AWalker walker);
+    
+    public String getName();
+    
+    public String getDescription();
 }

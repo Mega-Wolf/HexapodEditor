@@ -308,6 +308,31 @@ public class TripodLoopRobot extends AWalker {
     }
 
     @Override
+    public String getName() {
+        return "Tripod Robot";
+    }
+
+    @Override
+    public String getDescription() {
+        return "A robot which uses a tripod gait for movement. Can't rotate.";
+    }
+    
+    @Override
+    public String[][] getDNAInfo() {
+        return new String[][] {
+            {"Position - Leg 1"},
+            {"Position - Leg 2"},
+            {"Position - Leg 3"},
+            {"Position - Leg 4"},
+            {"Position - Leg 5"},
+            {"Position - Leg 6"},
+            {"Body Height"},
+            {"Orientation"},
+            {"Movement"},
+        };
+    }
+
+    @Override
     protected void setupChromosomes() {
         chromosomes = new double[][]{
             {0, 0},

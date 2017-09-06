@@ -25,4 +25,13 @@ public class FHide implements IFitness{
         //empty
     }
     
+    @Override
+    public String getName() {
+        return "Hiding";
+    }
+
+    @Override
+    public String getDescription() {
+        return "-5 * body height + movement ahead";
+    }
 }

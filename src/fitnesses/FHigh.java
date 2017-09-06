@@ -23,4 +23,14 @@ public class FHigh implements IFitness {
         //empty
     }
     
+    @Override
+    public String getName() {
+        return "Height";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Robot body height + movement ahead";
+    }
+    
 }
