@@ -7,9 +7,7 @@ package mygame;
 
 import robots.AWalker;
 import fitnesses.IFitness;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -24,6 +22,10 @@ public class Population {
     private final IFitness fitness;
     private final AWalker luca;
     
+    private boolean running = true;
+    
+    private int loop;
+    
     /* Constructor */
     public Population(AWalker luca, IFitness fitness, List<AWalker> bestRobots) {
         this.luca = luca;
@@ -32,13 +34,13 @@ public class Population {
     }
     
     public void testGA() {
-        System.out.println("Start NEW");
+        loop = bestRobots.size();
         
-        bestRobots.clear();
+        running = true;
+        //bestRobots.clear();
 
         int POPULATION_SIZE = 128;
 
-        int loop = 0;
         double lowestFail = -9999999999f;
 
         /*
@@ -51,12 +53,17 @@ public class Population {
             }
         }
          */
-        boolean running = true;  
         
         AWalker population[] = new AWalker[POPULATION_SIZE];
         AWalker populationDummy[] = new AWalker[POPULATION_SIZE];
         for (int i = 0; i < POPULATION_SIZE; i++) {
-            populationDummy[i] = luca.newInstance();
+            
+            if (loop == 0) {
+                populationDummy[i] = luca.newInstance();
+            } else {
+                populationDummy[i] = luca.newInstance(luca.getDNA(), luca.getShallMutate());
+            }
+            
         }
 
         while (running) {
@@ -106,6 +113,8 @@ public class Population {
             }
             */
             
+            /*
+            
             if (loop > 1500) {
                 break;
             }
@@ -135,8 +144,10 @@ public class Population {
                 //System.out.println();
                 
             }
-            
+            */
             loop++;
+            
+            
         }
     }
     
@@ -161,5 +172,9 @@ public class Population {
     
     public List<AWalker> getBestRobots() {
         return bestRobots;
+    }
+    
+    public void stopSim() {
+        running = false;
     }
 }

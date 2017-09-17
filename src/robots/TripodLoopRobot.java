@@ -51,6 +51,11 @@ public class TripodLoopRobot extends AWalker {
     public TripodLoopRobot(double[][] chromosomes) {
         this.chromosomes = chromosomes;
     }
+    
+    public TripodLoopRobot(double[][] chromosomes, boolean[][] mutate) {
+        this.chromosomes = chromosomes;
+        this.chromosomeMutations = mutate;
+    }
 
     /**
      * Constructor for genetical usage. Takes to parents and lets mutation and
@@ -74,10 +79,10 @@ public class TripodLoopRobot extends AWalker {
             chromosomes[c][i] = clamp(0, chromosomes[c][i], 3);
         } else if (c == C_ROTATION) {
             if (i == 0) {
-                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
+                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = clamp(-Math.PI / 2, chromosomes[c][i], Math.PI / 2);
             } else {    // y Wert egal
-                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
+                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = (2 * Math.PI + chromosomes[c][i]) % (2 * Math.PI);
             }
 
@@ -301,6 +306,16 @@ public class TripodLoopRobot extends AWalker {
     public AWalker newInstance() {
         return new TripodLoopRobot(true);
     }
+    
+    @Override
+    public AWalker newInstance(double[][] dna) {
+        return new TripodLoopRobot(dna);
+    }
+    
+    @Override
+    public AWalker newInstance(double[][] dna, boolean[][] mutate) {
+        return new TripodLoopRobot(dna, mutate);
+    }
 
     @Override
     public AWalker newInstance(AWalker parent0, AWalker parent1) {
@@ -344,6 +359,17 @@ public class TripodLoopRobot extends AWalker {
             {0},
             {0, 0},
             {0, 0},};
+        
+        chromosomeMutations = new boolean[][]{
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true},
+            {true, true},
+            {true, true},};
     }
 
 }

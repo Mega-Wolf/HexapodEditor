@@ -54,6 +54,11 @@ public class BetterRobot extends AWalker{
     public BetterRobot(double[][] chromosomes) {
         this.chromosomes = chromosomes;
     }
+    
+    public BetterRobot(double[][] chromosomes, boolean[][] mutate) {
+        this.chromosomes = chromosomes;
+        this.chromosomeMutations = mutate;
+    }
 
     /**
      * Constructor for genetical usage. Takes to parents and lets mutation and
@@ -81,7 +86,7 @@ public class BetterRobot extends AWalker{
                 chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = clamp(-Math.PI / 2, chromosomes[c][i], Math.PI / 2);
             } else {    // y Wert egal
-                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
+                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = (2 * Math.PI + chromosomes[c][i]) % (2 * Math.PI);
             }
         } else if (c == C_MOVE_ROTATION) {
@@ -342,6 +347,16 @@ public class BetterRobot extends AWalker{
     public AWalker newInstance() {
         return new BetterRobot(true);
     }
+    
+    @Override
+    public AWalker newInstance(double[][] dna) {
+        return new BetterRobot(dna);
+    }
+    
+    @Override
+    public AWalker newInstance(double[][] dna, boolean[][] mutate) {
+        return new BetterRobot(dna, mutate);
+    }
 
     @Override
     public AWalker newInstance(AWalker parent0, AWalker parent1) {
@@ -400,6 +415,19 @@ public class BetterRobot extends AWalker{
             {0, 0},
             {0, 0},
             {0 }
+        };
+        
+        chromosomeMutations = new boolean[][]{
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true},
+            {true, true},
+            {true, true},
+            {true}
         };
     }
 

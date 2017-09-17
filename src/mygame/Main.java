@@ -10,16 +10,12 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import fitnesses.FRotate;
-import fitnesses.IFitness;
 import javafx.application.Application;
-import robots.BetterRobot;
 import thread.Output;
 
 public class Main extends SimpleApplication {
@@ -294,22 +290,22 @@ public class Main extends SimpleApplication {
         robot.setRotation(g, ((int) sum * 1f / 30f) % 1. );
          */
         
-        if (Output.getInsatnce() == null || Output.getInsatnce().getPopulation() == null) {
+        if (Output.getInstance() == null || Output.getInstance().getPopulation() == null) {
             return;
         }
         
         if (sum == 0) {
             
-            walker = Output.getInsatnce().getPopulation().getLast();                    
+            walker = Output.getInstance().getPopulation().getLast();                    
 
-            int number = Output.getInsatnce().getPopulation().getBestRobots().size() - 1;
+            int number = Output.getInstance().getPopulation().getBestRobots().size() - 1;
             
             //walker = t;
             if (walker == null) {
                 return;
             }
             
-            Output.getInsatnce().choose(number);
+            Output.getInstance().choose(number);
             
             /*
             fitnessText.setText("Fitness: " + walker.getFitness() +
@@ -319,7 +315,9 @@ public class Main extends SimpleApplication {
                     "          Movement lateral: " + walker.getDirection()[0] + ")");
             */
             
-            robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
+            //robot.getRobotNode().rotateUpTo(new Vector3f(0, 1, 0));
+            robot.getRobotNode().getLocalRotation().set(0, 0, 0, 1);
+            
             
             System.out.println("Took this: " + walker);
             

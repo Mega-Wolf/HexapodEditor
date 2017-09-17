@@ -58,6 +58,7 @@ public abstract class AWalker {
 
     //two dimensional array, so the genes are located in chromosomes
     protected double[][] chromosomes;
+    protected boolean[][] chromosomeMutations;
 
     /* Constructors */
     /**
@@ -77,7 +78,9 @@ public abstract class AWalker {
         if (mutate) {
             for (int c = 0; c < chromosomes.length; c++) {
                 for (int i = 0; i < chromosomes[c].length; i++) {
-                    mutateCritical(c, i);
+                    if (chromosomeMutations[c][i]) {
+                        mutateCritical(c, i);
+                    }
                 }
             }
         }
@@ -91,6 +94,7 @@ public abstract class AWalker {
      */
     public AWalker(AWalker parent0, AWalker parent1) {
         setupChromosomes();
+        chromosomeMutations = parent0.chromosomeMutations;
         for (int c = 0; c < chromosomes.length; c++) {
             System.arraycopy(Math.random() < 0.5 ? parent0.chromosomes[c] : parent1.chromosomes[c], 0, chromosomes[c], 0, parent0.chromosomes[c].length);
         }
@@ -104,11 +108,13 @@ public abstract class AWalker {
     protected void mutate() {
         for (int c = 0; c < chromosomes.length; c++) {
             for (int i = 0; i < chromosomes[c].length; i++) {
-                if (Math.random() < MUTATION_RATE) {
+                if (chromosomeMutations[c][i]) {
                     if (Math.random() < MUTATION_RATE) {
-                        mutateCritical(c, i);
-                    } else {
-                        mutateNormal(c, i);
+                        if (Math.random() < MUTATION_RATE) {
+                            mutateCritical(c, i);
+                        } else {
+                            mutateNormal(c, i);
+                        }
                     }
                 }
             }
@@ -132,7 +138,10 @@ public abstract class AWalker {
         return fitness;
     }
 
-    private void calcPositions() {
+    /**
+     * Calculates the positions of the joints
+     */
+    public void calcPositions() {
         //TODO; mega ugly und uneffektiv; aber immerhin funktioniert es endlich
 
         //könnte man eig einmal berechnen
@@ -529,6 +538,10 @@ public abstract class AWalker {
     public abstract void setRotation(double t);
 
     public abstract AWalker newInstance();
+    
+    public abstract AWalker newInstance(double[][] dna);
+    
+    public abstract AWalker newInstance(double[][] dna, boolean[][] mutate);
 
     public abstract AWalker newInstance(AWalker parent0, AWalker parent1);
 
@@ -563,6 +576,10 @@ public abstract class AWalker {
      */
     public double[][] getDNA() {
         return chromosomes;
+    }
+    
+    public boolean[][] getShallMutate() {
+        return chromosomeMutations;
     }
     
     /**
