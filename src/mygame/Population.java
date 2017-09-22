@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mygame;
 
 import robots.AWalker;
@@ -12,8 +7,10 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Holds GeneticRobots
- * @author Tobia
+ * Holds a group of AWalkers (which must be all of the same subclass) and manages the fitness checks and breeding selection.
+ * Started by the Output window on a separate thread. Additionally saves the best robot after every generation
+ * so that the fitness value of those can be shown on the Output thread and the main thread can show the best one in action.
+ * @author Tobias
  */
 public class Population {
     
@@ -27,12 +24,22 @@ public class Population {
     private int loop;
     
     /* Constructor */
+    
+    /**
+     * Creates a new population
+     * @param luca a blueprint for the type of robot: https://en.wikipedia.org/wiki/Last_universal_common_ancestor
+     * @param fitness the fitness function which is used in the specific fitness tests
+     * @param bestRobots the list which holds the best robot of every generation; passed as a parameter so that older lists can be continued and thread-safe lists can be used
+     */
     public Population(AWalker luca, IFitness fitness, List<AWalker> bestRobots) {
         this.luca = luca;
         this.fitness = fitness;
         this.bestRobots = bestRobots;
     }
     
+    /**
+     * Runs the genetic algorithm until {@link stopSimulation} is called
+     */
     public void testGA() {
         loop = bestRobots.size();
         
@@ -75,7 +82,11 @@ public class Population {
                 }
             }
 
+            // shuffles the AWalkers in the population so that really no one has an advantage/disadvantage due to Java's stabil sort
+            // in fact this is not needed, because the order before is random as well
             shuffleArray(population);
+            
+            
             Arrays.sort(population, (e1, e2) -> Double.compare(e2.getFitness(), e1.getFitness()));
 
             for (int i = 0; i < POPULATION_SIZE; i++) {
@@ -145,12 +156,14 @@ public class Population {
                 
             }
             */
-            loop++;
-            
-            
+            loop++;        
         }
     }
     
+    /**
+     * Shuffles an array of objects
+     * @param array the array which shall be shuffled
+     */
     private static void shuffleArray(Object[] array) {
         int index;
         Object temp;
@@ -163,6 +176,10 @@ public class Population {
         }
     }
     
+    /**
+     * A shortcut to get the best robot of the latest generation
+     * @return the best robot of the latest generation; {@code null} if there is none yet
+     */
     public AWalker getLast() {
         if (bestRobots.isEmpty()) {
             return null;
@@ -170,10 +187,17 @@ public class Population {
         return bestRobots.get(bestRobots.size() - 1);
     }
     
+    /**
+     * Returns a list with the best robot of every generation
+     * @return A list with the best robot of every generation
+     */
     public List<AWalker> getBestRobots() {
         return bestRobots;
     }
-    
+
+    /**
+     * Tells the population to stop the simulation after the curretn simulation
+     */
     public void stopSim() {
         running = false;
     }

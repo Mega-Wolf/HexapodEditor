@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package visuals;
 
 import com.jme3.app.SimpleApplication;
@@ -43,12 +38,13 @@ public class Robot {
     private final Geometry[] jointTop = new Geometry[6];
     private final Geometry[] jointBottom = new Geometry[6];
 
-    private final Geometry sphereSpecial;
+    private final Geometry sphereWeapon;
     
     //angles
     private final float[] horizontalAngles = {0, 0, 0, 0, 0, 0};
     private final float[] upAngles = {-60 / 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI, -60/ 180f * FastMath.PI};
     private final float[] downAngles = {120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI, 120/ 180f * FastMath.PI};
+    
     /* Constructor */
     
     /**
@@ -160,21 +156,21 @@ public class Robot {
         
         //jointBottom[0].removeFromParent();
         
-        sphereSpecial = sphere.clone(false);
-        sphereSpecial.setMaterial(matSpecial);
+        sphereWeapon = sphere.clone(false);
+        sphereWeapon.setMaterial(matSpecial);
         
-        robotNode.attachChild(sphereSpecial);
+        robotNode.attachChild(sphereWeapon);
         
-        sphereSpecial.setLocalTranslation(0, 0, 1);  
+        sphereWeapon.setLocalTranslation(0, 0, 1);  
         updateRotations();
 
         //center();
     }
 
     /**
-     * Sets the rotations
+     * Sets the rotations of the robot according to the internally saved rotation values
      */
-    public void updateRotations() {
+    private void updateRotations() {
         for (int i = 0; i < AWalker.LEGS; i++) {        
             // [0, 2 * PI)
             nodeHorizontal[i].setLocalRotation(new Quaternion(new float[]{0, horizontalAngles[i], 0}));
@@ -183,7 +179,10 @@ public class Robot {
         }    
     }
 
-    //Geometry centerGeometry;
+    /**
+     * Calculates the center of mass of the robot
+     * @return The center of mass of the robot
+     */
     public Vector3f getCenter() {
         /*
         if (centerGeometry == null) {
@@ -199,6 +198,7 @@ public class Robot {
         }
          */
 
+        //Hence this function is never used; the values here are quiet old and should be updated to consts instead of hardcoded values
         Vector3f center = body.getWorldTranslation().mult(3 / 2f * FastMath.sqrt(3) * 1 * 1 * 0.3f);
 
         for (int i = 0; i < 6; i++) {
@@ -219,6 +219,10 @@ public class Robot {
     
     /* Getter */
 
+    /**
+     * Returns a node which contains the robot
+     * @return The node of the robot
+     */
     public Node getRobotNode(){
         return robotNode;
     }
@@ -226,16 +230,16 @@ public class Robot {
     /* Setter */
     
     /**
-     * Gets the rotations from the associated AWalker
-     * @param g The associated robot
+     * Sets the rotations according to the associated AWalker
+     * @param walker The associated robot
      * @param t The time in the cycle (0 <= t < 1)
      */
-    public void setRotation(AWalker g, double t) {
-        g.setRotation(t);
+    public void setRotation(AWalker walker, double t) {
+        walker.setRotation(t);
         for (int c = 0; c < AWalker.LEGS; c++) {
-            horizontalAngles[c] = (float) g.getRotHorizontal()[c];
-            upAngles[c] = (float) g.getRotTop()[c];
-            downAngles[c] = (float) g.getRotBottom()[c];
+            horizontalAngles[c] = (float) walker.getRotHorizontal()[c];
+            upAngles[c] = (float) walker.getRotTop()[c];
+            downAngles[c] = (float) walker.getRotBottom()[c];
         }
         updateRotations();
     }

@@ -131,18 +131,19 @@ public class BetterRobot extends AWalker{
 
     private void inverseKinematics(int leg) {
         
-        
         double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * correctT);
         double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * correctT);
         
         //double tx = chromosomes[leg][G_X] * (1 - correctT);
         //double tz = chromosomes[leg][G_Z] * (1 - correctT);
 
-        double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
-        double tz = -1 -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
+        double tz = -1;
         
-        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI);
-        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI);
+        double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
+        tz += -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
+        
+        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
+        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
         
         
         double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
@@ -155,7 +156,6 @@ public class BetterRobot extends AWalker{
         
         tx += cosA * posDiff.x + sinA * posDiff.z;
         tz += -sinA * posDiff.x + cosA * posDiff.z;
-        
         
         //double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
         //double rotCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0]);
@@ -234,8 +234,8 @@ public class BetterRobot extends AWalker{
         double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
         double tz = -1 -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
         
-        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI /*+ chromosomes[C_MOVE_ROTATION][0]*/);
-        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI /*+ chromosomes[C_MOVE_ROTATION][0]*/);
+        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
+        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
         
         double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
         double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
