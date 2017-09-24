@@ -15,7 +15,7 @@ import robots.AWalker;
  * 3D representation of the robot in the scene
  * @author Tobias
  */
-public class Robot {
+public class VisualRobot {
 
     private final SimpleApplication app;
 
@@ -51,7 +51,7 @@ public class Robot {
      * Creates a 3d model of the robot
      * @param app 
      */
-    public Robot(SimpleApplication app) {
+    public VisualRobot(SimpleApplication app) {
         this.app = app;
 
         Node rn = app.getRootNode();

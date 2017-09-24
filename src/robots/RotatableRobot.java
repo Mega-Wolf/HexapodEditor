@@ -10,7 +10,7 @@ import math.Vector3d;
  *
  * @author Tobias
  */
-public class BetterRobot extends AWalker{
+public class RotatableRobot extends AWalker{
 
     /* Consts */
     
@@ -38,7 +38,7 @@ public class BetterRobot extends AWalker{
      * 
      * @param mutate whether the robot is a random one or the default one
      */
-    public BetterRobot(boolean mutate) {
+    public RotatableRobot(boolean mutate) {
         super(mutate);
     }
 
@@ -51,11 +51,11 @@ public class BetterRobot extends AWalker{
      * start rotation around the x,y,z axis chromosome 8: 2 doubles for x,z for
      * translation during walking
      */
-    public BetterRobot(double[][] chromosomes) {
+    public RotatableRobot(double[][] chromosomes) {
         this.chromosomes = chromosomes;
     }
     
-    public BetterRobot(double[][] chromosomes, boolean[][] mutate) {
+    public RotatableRobot(double[][] chromosomes, boolean[][] mutate) {
         this.chromosomes = chromosomes;
         this.chromosomeMutations = mutate;
     }
@@ -67,7 +67,7 @@ public class BetterRobot extends AWalker{
      * @param g0 Parent 1
      * @param g1 Parent 2
      */
-    public BetterRobot(AWalker g0, AWalker g1) {
+    public RotatableRobot(AWalker g0, AWalker g1) {
         super(g0, g1);
     }
 
@@ -435,22 +435,22 @@ public class BetterRobot extends AWalker{
 
     @Override
     public AWalker newInstance() {
-        return new BetterRobot(true);
+        return new RotatableRobot(true);
     }
     
     @Override
     public AWalker newInstance(double[][] dna) {
-        return new BetterRobot(dna);
+        return new RotatableRobot(dna);
     }
     
     @Override
     public AWalker newInstance(double[][] dna, boolean[][] mutate) {
-        return new BetterRobot(dna, mutate);
+        return new RotatableRobot(dna, mutate);
     }
 
     @Override
     public AWalker newInstance(AWalker parent0, AWalker parent1) {
-        return new BetterRobot(parent0, parent1);
+        return new RotatableRobot(parent0, parent1);
     }
     
     @Override

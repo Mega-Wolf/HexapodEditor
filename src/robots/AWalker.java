@@ -7,7 +7,7 @@ import fitnesses.IFitness;
 import java.util.Arrays;
 
 /**
- * A robot which is able to walk in any form and is able to be used in a GA
+ * A loopable robot which can be used in a GA
  *
  * @author Tobias
  */
@@ -447,6 +447,9 @@ public abstract class AWalker {
                         fitness--;
                     }
                 }
+                break;
+            case 15:
+                //disable chck for the middle, because here are sometimes errors
                 break;
             default:
                 for (int i = 0; i < 6; i++) {

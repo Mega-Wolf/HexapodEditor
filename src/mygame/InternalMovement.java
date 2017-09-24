@@ -12,10 +12,11 @@ import math.Vector3d;
 import robots.AWalker;
 
 /**
- * Holds all the information of a movement Additional to the rotations, the
- * positions are already pre-calculated to speed up the simulations
+ * Holds all the information of a movement.
+ * Additional to the rotations, the positions are already pre-calculated to speed up the simulations.
+ * Needed by Hexapod Battle. Not important for Hexapod Walk itself.
  *
- * @author Tobias Wolf
+ * @author Tobias
  *
  */
 public class InternalMovement {

@@ -117,6 +117,14 @@ public class Population {
 
             bestRobots.add(population[0]);
             
+            
+            //Comment this in for the parameter comparison
+            /*
+            if (loop == 500) {
+                break;
+            }
+            */
+            
             /*
             if (loop % 10 == 0) {
                 //System.out.println(lowestFail + "," + population[0].getFitness() + "," + population[POPULATION_SIZE - 1].getFitness());

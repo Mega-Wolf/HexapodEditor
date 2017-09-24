@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package visuals;
 
 import com.jme3.math.FastMath;
@@ -13,7 +8,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 
 /**
- *
+ * A 3D hexagon
  * @author Tobias
  */
 public class Hexagon {

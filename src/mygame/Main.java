@@ -2,7 +2,7 @@ package mygame;
 
 import com.jme3.app.DebugKeysAppState;
 import robots.AWalker;
-import visuals.Robot;
+import visuals.VisualRobot;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.StatsAppState;
 import com.jme3.material.Material;
@@ -17,12 +17,16 @@ import com.jme3.scene.shape.Quad;
 import javafx.application.Application;
 import thread.Output;
 
+/**
+ * The main class starts the GUI window and is used to render the robot. A robot is always shown for two cycles and is then replaced by the newest one of the robot population.
+ * @author Tobias
+ */
 public class Main extends SimpleApplication {
 
     /* Variables */
     
     private float sum = 0;
-    private Robot robot;
+    private VisualRobot robot;
     private AWalker walker;
     private final Node robotOuterNode = new Node();
     private final Node robotStartNode = new Node();
@@ -55,9 +59,9 @@ public class Main extends SimpleApplication {
         setDisplayFps(false);
         rootNode.scale(0.2f);
         
-        cam.setLocation(new Vector3f(0,2,5));
+        cam.setLocation(new Vector3f(0,3,7));
         System.out.println(cam.getRotation());
-        cam.setRotation(cam.getRotation().mult(new Quaternion(new float[] {0.1f,0,0})));
+        cam.setRotation(cam.getRotation().mult(new Quaternion(new float[] {0.2f,0,0})));
         
         
         Quad q = new Quad(100, 100);
@@ -72,7 +76,7 @@ public class Main extends SimpleApplication {
         groundGeometry.setLocalRotation(new Quaternion(new float[]{-FastMath.PI / 2, 0, 0}));
         groundGeometry.setLocalTranslation(-50, -0.2f, 50);
 
-        robot = new Robot((SimpleApplication) this);
+        robot = new VisualRobot((SimpleApplication) this);
 
         robotOuterNode.attachChild(robot.getRobotNode());
         
@@ -114,22 +118,20 @@ public class Main extends SimpleApplication {
 
         robot.setRotation(walker, sum % 1.);
         
-        /*
+        
         if (sum > nextReset) {
             nextReset += 1;
             
-            robotOuterNode.setLocalTranslation(1 * (float) walker.getDirection()[0], (float) walker.getStartHeight(), 1 * (float) walker.getDirection()[1]);
+            robotOuterNode.setLocalTranslation(1 * (float) walker.getDirection()[0], 0, 1 * (float) walker.getDirection()[1]);
             robotOuterNode.setLocalRotation(new Quaternion(new float[]{0, 1 * (float) walker.getRotationAngle(), 0}));
             
             //robotStartNode.getLocalRotation().mult(new Quaternion(new float[]{0, 1 * (float) walker.getRotationAngle(), 0}));
+            
+            robotStartNode.setLocalTransform(robotOuterNode.getLocalTransform());
         }
-        */
         
-        robotOuterNode.setLocalTranslation(sum * (float) walker.getDirection()[0], (float) walker.getStartHeight(), sum * (float) walker.getDirection()[1]);
-        robotOuterNode.setLocalRotation(new Quaternion(new float[]{0, sum * (float) walker.getRotationAngle(), 0}));
-        
-        
-        
+        robotOuterNode.setLocalTranslation((sum % 1f) * (float) walker.getDirection()[0], (float) walker.getStartHeight(), (sum % 1f) * (float) walker.getDirection()[1]);
+        robotOuterNode.setLocalRotation(new Quaternion(new float[]{0, (sum % 1f) * (float) walker.getRotationAngle(), 0}));
 
         sum += tpf / 2.;
         if (sum > 2) {

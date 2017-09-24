@@ -43,12 +43,12 @@ import static mygame.InternalMovement.MOVEMENTS;
 import static mygame.InternalMovement.MOVEMENT_ENDING;
 import mygame.Population;
 import robots.AWalker;
-import robots.BetterRobot;
+import robots.RotatableRobot;
 import robots.TripodLoopRobot;
 
 /**
  *
- * @author Tobia
+ * @author Tobias
  */
 public class Output extends Application {
 
@@ -56,7 +56,7 @@ public class Output extends Application {
 
     public static final AWalker[] WALKERS = {
         new TripodLoopRobot(false),
-        new BetterRobot(false)
+        new RotatableRobot(false)
     };
 
     public static final IFitness[] FITNESSES = {
@@ -73,7 +73,7 @@ public class Output extends Application {
     private Population population;
 
     private XYChart.Series series;
-    
+
     private final Object seriesLock = new Object();
 
     @Override
@@ -115,7 +115,15 @@ public class Output extends Application {
         primaryStage.show();
     }
 
+    
+    /**
+     * Starts the simulation and builds up the GUI for that
+     * @param robotIndex the index of the robot in Output.WALKERS
+     * @param fitnessIndex the index of the fitness in Output.FITNESSES
+     */
     private void startSimulation(int robotIndex, int fitnessIndex) {
+        //TODO: Definitely break up this big chunk of code
+        
         Pane firstPane = new VBox();
 
         LineChart<Number, Number> graph;
@@ -124,7 +132,7 @@ public class Output extends Application {
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Generation");
         yAxis.setLabel("Fitness");
-        
+
         graph = new LineChart<Number, Number>(xAxis, yAxis) {
             @Override
             protected void layoutPlotChildren() {
@@ -147,48 +155,64 @@ public class Output extends Application {
                 }
             }
         };
-        
+
         graph.setTitle(FITNESSES[fitnessIndex].getName() + " (" + FITNESSES[fitnessIndex].getDescription() + ")");
         graph.setCreateSymbols(false);
+        
+        //set this to 50-100 to get a graph for comparing parameters; however only "1" allows to stop and restart the simulation
+        //Don't forget to uncomment the little if cluase in Population (line 121)
+        int testSize = 1;
+        
+        XYChart.Series seriesArray[] = new XYChart.Series[testSize];
+        
+        for (int i = 0; i < testSize; i++) {
+            series = new XYChart.Series();
+            series.setName(WALKERS[robotIndex].getName());
+            graph.getData().add(series);
+            seriesArray[i] = series;
+        }
+        
+        
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                for (int i = 0; i < testSize; i++) {
+                    //System.out.println(i);
+                    series = seriesArray[testSize];
 
-        series = new XYChart.Series();
-        series.setName(WALKERS[robotIndex].getName());
-
-        graph.getData().add(series);
-
-        population = new Population(WALKERS[robotIndex], FITNESSES[fitnessIndex], Collections.synchronizedList(new ArrayList<>()));
-        Thread thread = new Thread(() -> {
-            //while(true) {
-            population.testGA();
-            //}
-        });
-        thread.start();
+                    population = new Population(WALKERS[robotIndex], FITNESSES[fitnessIndex], Collections.synchronizedList(new ArrayList<>()));      
+                    population.testGA();
+                    
+                    choose(499);
+                }
+            }
+        };
+        
+        t.start();
 
         TextField populationIndex = new TextField("0");
 
         Label ofLabel = new Label(" / " + (population.getBestRobots().size() - 1));
-        
+
         Label fitnessLabel = new Label();
         Pane fitnessPane = new StackPane();
         fitnessPane.getChildren().add(fitnessLabel);
-        
+
         fitnessLabel.setContentDisplay(ContentDisplay.CENTER);
-        
+
         Button saveButton = new Button("Save Movement");
-        
+
         Pane popPane = new HBox();
         popPane.getChildren().addAll(populationIndex, ofLabel);
-        
 
         //Label robotLabel = new Label(Test.WALKERS[robotIndex].getName());
         //Label fitnessLabel = new Label(Test.FITNESSES[fitnessIndex].getName());
-        
         TextField[][] geneFields;
         ToggleButton[][] mutationButtons;
-        
+
         double[][] dna;
         boolean[][] mutations;
-        
+
         GridPane dnaPane = new GridPane();
         dnaPane.setVgap(5);
         dnaPane.setHgap(5);
@@ -199,7 +223,7 @@ public class Output extends Application {
         for (int i = 0; i < Output.WALKERS[robotIndex].getDNA().length; i++) {
             Label geneLabel = new Label(Output.WALKERS[robotIndex].getDNAInfo()[i][0]);
             dnaPane.add(geneLabel, 0, i);
-            
+
             geneFields[i] = new TextField[Output.WALKERS[robotIndex].getDNA()[i].length];
             mutationButtons[i] = new ToggleButton[Output.WALKERS[robotIndex].getDNA()[i].length];
             dna[i] = new double[Output.WALKERS[robotIndex].getDNA()[i].length];
@@ -207,55 +231,55 @@ public class Output extends Application {
             for (int ii = 0; ii < Output.WALKERS[robotIndex].getDNA()[i].length; ii++) {
                 //Label geneLabelInner = new Label((Output.WALKERS[robotIndex].getDNA()[i][ii]) + "");
                 //dnaPane.add(geneLabelInner, ii + 1, i);
-                
+
                 Pane innerPane = new HBox();
-                
+
                 TextField geneEdit = new TextField((Output.WALKERS[robotIndex].getDNA()[i][ii]) + "");
                 ToggleButton geneToggle = new ToggleButton("Keep");
-                
+
                 innerPane.getChildren().addAll(geneEdit, geneToggle);
                 dnaPane.add(innerPane, ii + 1, i);
-                
+
                 geneEdit.setId(i + "," + ii);
-                
+
                 geneEdit.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                     if (oldValue && !newValue) {
                         String id = geneEdit.getId();
                         String[] coords = id.split(",");
-                        
+
                         if (geneEdit.getText().matches("[+-]?((\\d+(\\.\\d*)?)|(\\.\\d+))")) {
                             dna[Integer.valueOf(coords[0])][Integer.valueOf(coords[1])] = Double.valueOf(geneEdit.getText());
-                            
+
                             AWalker walker = Output.WALKERS[robotIndex].newInstance(dna);
-            
+
                             if (walker.initialFitnessChecks(Output.FITNESSES[fitnessIndex]) == 0) {
                                 Output.FITNESSES[fitnessIndex].calcFitnessValue(walker);
                             }
-            
+
                             fitnessLabel.setText("Fitness: " + walker.getFitness());
-            
+
                             if (walker.getFitness() > 0) {
                                 saveButton.setDisable(false);
                             } else {
                                 saveButton.setDisable(true);
                             }
-                            
+
                         } else {
                             //geneEdit.setText(oldValue);
                             geneEdit.setText(dna[Integer.valueOf(coords[0])][Integer.valueOf(coords[1])] + "");
                         }
                     }
                 });
-                
+
                 geneToggle.setId(i + "," + ii);
-                
+
                 geneToggle.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                     String id = geneToggle.getId();
                     String[] coords = id.split(",");
-                    
+
                     mutations[Integer.valueOf(coords[0])][Integer.valueOf(coords[1])] = !newValue;
                 });
-                
+
                 /*
                 geneEdit.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
                     if (!geneEdit.focusedProperty().get()) {
@@ -273,94 +297,92 @@ public class Output extends Application {
                         }
                     }
                 });
-                */
-                
+                 */
                 geneFields[i][ii] = geneEdit;
                 mutationButtons[i][ii] = geneToggle;
-                
+
                 dna[i][ii] = (Output.WALKERS[robotIndex].getDNA()[i][ii]);
                 mutations[i][ii] = (Output.WALKERS[robotIndex].getShallMutate()[i][ii]);
             }
         }
-        
+
         populationIndex.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
             if (newValue.matches("\\d*")) {
                 int value = Math.max(0, Math.min(Integer.valueOf(newValue), population.getBestRobots().size() - 1));
-                
+
                 for (int i = 0; i < Output.WALKERS[robotIndex].getDNA().length; i++) {
                     for (int ii = 0; ii < Output.WALKERS[robotIndex].getDNA()[i].length; ii++) {
                         geneFields[i][ii].setText(population.getBestRobots().get(value).getDNA()[i][ii] + "");
                         dna[i][ii] = population.getBestRobots().get(value).getDNA()[i][ii];
                     }
                 }
-                
+
                 ofLabel.setText(" / " + (population.getBestRobots().size() - 1));
-                
+
                 fitnessLabel.setText("Fitness: " + population.getBestRobots().get(value).getFitness() + "");
                 saveButton.setDisable(false);
-            }
-            else {
+            } else {
                 populationIndex.setText(oldValue);
             }
         });
-        
+
         Pane IOPane = new HBox();
         Button stopSimulation = new Button("Stop Simulation");
         Button restartSimulation = new Button("Restart Simiulation");
-        
+
         stopSimulation.setOnAction(e -> {
             IOPane.getChildren().remove(stopSimulation);
             IOPane.getChildren().addAll(restartSimulation, fitnessPane, saveButton);
-            
+
             choose(population.getBestRobots().size() - 1);
-            
+
             for (int i = 0; i < Output.WALKERS[robotIndex].getDNA().length; i++) {
                 for (int ii = 0; ii < Output.WALKERS[robotIndex].getDNA()[i].length; ii++) {
                     geneFields[i][ii].setText(population.getLast().getDNA()[i][ii] + "");
                 }
             }
-            
+
             populationIndex.setText(population.getBestRobots().size() - 1 + "");
             ofLabel.setText(" / " + (population.getBestRobots().size() - 1));
-            
+
             fitnessLabel.setText("Fitness: " + population.getBestRobots().get(population.getBestRobots().size() - 1).getFitness() + "");
             saveButton.setDisable(false);
-            
+
             firstPane.getChildren().add(1, popPane);
             firstPane.getChildren().add(2, dnaPane);
-            
+
             population.stopSim();
         });
-        
+
         restartSimulation.setOnAction(e -> {
             IOPane.getChildren().removeAll(restartSimulation, fitnessPane, saveButton);
             IOPane.getChildren().add(stopSimulation);
-            
+
             firstPane.getChildren().remove(popPane);
             firstPane.getChildren().remove(dnaPane);
-            
+
             population = new Population(Output.WALKERS[robotIndex].newInstance(dna, mutations), FITNESSES[fitnessIndex], population.getBestRobots());
             Thread thread_ = new Thread(() -> {
                 population.testGA();
             });
-            
+
             thread_.start();
         });
-        
+
         saveButton.setDisable(true);
         saveButton.setOnAction(e -> {
             InternalMovement im = new InternalMovement(Output.WALKERS[robotIndex].newInstance(dna));
-            
+
             int i = 0;
-            for(; new File(MOVEMENTS + System.getProperty("file.separator") + i + MOVEMENT_ENDING).isFile();i++);
-            
+            for (; new File(MOVEMENTS + System.getProperty("file.separator") + i + MOVEMENT_ENDING).isFile(); i++);
+
             try {
                 im.export(i);
             } catch (IOException ex) {
                 Logger.getLogger(Output.class.getName()).log(Level.SEVERE, null, ex);
             }
         });
-        
+
         IOPane.getChildren().addAll(stopSimulation);
 
         firstPane.getChildren().addAll(graph, IOPane);
@@ -368,15 +390,11 @@ public class Output extends Application {
         Scene scene = new Scene(firstPane, 1024, 768);
         primaryStage.setScene(scene);
     }
-
-    public static Output getInstance() {
-        return instance;
-    }
-
-    public Population getPopulation() {
-        return population;
-    }
-
+    
+    /**
+     * Update the chart
+     * @param index the number to which the graph shall be updated
+     */
     public void choose(int index) {
         synchronized (seriesLock) {
             if (index == 0) {
@@ -392,6 +410,24 @@ public class Output extends Application {
         }
     }
 
+    /**
+     * Returns the only instance of Output in the program
+     * @return a pseudo singleton of Output
+     */
+    public static Output getInstance() {
+        return instance;
+    }
+    
+    /* Getter */
+    
+    /**
+     * Returns the curret population
+     * @return the current population
+     */
+    public Population getPopulation() {
+        return population;
+    }
+    
     @Override
     public void stop() throws Exception {
         population.stopSim();
