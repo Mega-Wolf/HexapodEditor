@@ -73,7 +73,7 @@ public class Robot {
 
         body.rotate(0, 30 / 180f * FastMath.PI,0);
         
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < AWalker.LEGS; i++) {
             nodeSolid[i] = new Node();
             robotNode.attachChild(nodeSolid[i]);
             
@@ -86,7 +86,7 @@ public class Robot {
         
         Geometry gHorHex = Hexagon.create3DHexagon(0.15f, 0.5f);
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < AWalker.LEGS; i++) {
             nodeHorizontal[i] = new Node();
             nodeHorizontal[i].setLocalTranslation(0, 0, 1);
             nodeSolid[i].attachChild(nodeHorizontal[i]);
@@ -104,7 +104,7 @@ public class Robot {
 
         Geometry gUpHex = Hexagon.create3DHexagon(0.15f, 1.5f);
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < AWalker.LEGS; i++) {
             nodeTop[i] = new Node();
             nodeTop[i].setLocalTranslation(0, 0, 0.5f);
             nodeHorizontal[i].attachChild(nodeTop[i]);
@@ -121,7 +121,7 @@ public class Robot {
 
         Geometry gDownHex = Hexagon.create3DHexagon(0.15f, 3f);
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < AWalker.LEGS; i++) {
             nodeBottom[i] = new Node();
             nodeBottom[i].setLocalTranslation(0, 0, 1.5f);
             nodeTop[i].attachChild(nodeBottom[i]);
@@ -138,7 +138,7 @@ public class Robot {
 
         body.setMaterial(matHex);
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < AWalker.LEGS; i++) {
             jointSolid[i].setMaterial(matSphere);
             jointHorizontal[i].setMaterial(matSphere);
             jointTop[i].setMaterial(matSphere);
@@ -177,6 +177,9 @@ public class Robot {
             nodeTop[i].setLocalRotation(new Quaternion(new float[]{upAngles[i], 0, 0}));
             nodeBottom[i].setLocalRotation(new Quaternion(new float[]{downAngles[i], 0, 0}));
         }    
+        
+        //System.out.println(":");
+        //System.out.println(jointBottom[0].getWorldTransform());
     }
 
     /**

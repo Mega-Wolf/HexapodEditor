@@ -131,16 +131,48 @@ public class BetterRobot extends AWalker{
 
     private void inverseKinematics(int leg) {
         
-        double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * correctT);
-        double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * correctT);
+        /*
+        if (leg == 1) {
+            chromosomes = new double[][]{
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {1.5},
+                {0, 0},
+                {0, 6},
+                {Math.PI / 2}
+            };
+        }
+        
+            
+        setDistance(-0.25);
+        correctT = 0.75 ;
+        */
+        
+        double firstAngle = correctT;
+        if (Math.abs(correctT) > 0.5) {
+            firstAngle = -Math.signum(correctT) + correctT;
+        }
+        
+        double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * firstAngle);
+        double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * firstAngle);
         
         //double tx = chromosomes[leg][G_X] * (1 - correctT);
         //double tz = chromosomes[leg][G_Z] * (1 - correctT);
 
         double tz = -1;
         
-        double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
+        //System.out.println("x1: " + 0);
+        //System.out.println("z1: " + tz);
+        
+        double tx = (changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1));
         tz += -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
+        
+        //System.out.println("x2: " + (changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1)));
+        //System.out.println("z2: " + (-changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1)));
         
         double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
         double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
@@ -156,6 +188,19 @@ public class BetterRobot extends AWalker{
         
         tx += cosA * posDiff.x + sinA * posDiff.z;
         tz += -sinA * posDiff.x + cosA * posDiff.z;
+        
+        /*
+        System.out.println("x3: " + (cosA * posDiff.x + sinA * posDiff.z));
+        System.out.println("z3: " + (-sinA * posDiff.x + cosA * posDiff.z));
+        
+        
+        if (leg == 1) {
+            System.out.println(tx);
+            System.out.println(tz);
+            System.exit(0);
+        }
+        */
+        
         
         //double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
         //double rotCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0]);
@@ -225,17 +270,47 @@ public class BetterRobot extends AWalker{
 
     private void moveBack(int leg, double t) {
         
-        double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * correctT);
-        double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * correctT);
+        /*
+        if (leg == 0) {
+            chromosomes = new double[][]{
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {0, 3},
+                {1.5},
+                {0, 0},
+                {0, 6},
+                {Math.PI / 2}
+            };
+        }
+        
+            
+        setDistance(0.5);
+        correctT = 0.5 ;
+        */
+        
+        double firstAngle = correctT;
+        if (Math.abs(correctT) > 0.5) {
+            firstAngle = -Math.signum(correctT) + correctT;
+        }
+        
+        double changeSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0] * firstAngle);
+        double changeCosA = Math.cos(chromosomes[C_MOVE_ROTATION][0] * firstAngle);
+        
         
         //double tx = chromosomes[leg][G_X] * (1 - correctT);
         //double tz = chromosomes[leg][G_Z] * (1 - correctT);
 
-        double tx = changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1);
+        double tx =  (changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1));
         double tz = -1 -changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1);
         
-        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
-        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * correctT);
+        //System.out.println(changeCosA * chromosomes[leg][G_X] + changeSinA * (chromosomes[leg][G_Z] + 1));
+        //System.out.println(-changeSinA * chromosomes[leg][G_X] + changeCosA * (chromosomes[leg][G_Z] + 1));
+        
+        double sinA = Math.sin((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * Math.abs(correctT));
+        double cosA = Math.cos((leg * 60 + 30) / 180. * Math.PI + chromosomes[C_MOVE_ROTATION][0] * Math.abs(correctT));
         
         double sinAY = Math.sin( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
         double cosAY = Math.cos( ( (leg * 60 + 30) / 180. * Math.PI) + chromosomes[C_ROTATION][1]);
@@ -245,9 +320,22 @@ public class BetterRobot extends AWalker{
         
         double ty = -chromosomes[C_Y_OFFSET][0] + sinX * Math.cos(-( (leg * 60 + 30) / 180. * Math.PI) - chromosomes[C_ROTATION][1]) * A;
         
-        tx += cosA * posDiff.x + sinA * posDiff.z;
+        tx += (cosA * posDiff.x + sinA * posDiff.z);
         ty += 0.5 * Math.sin(t * 2 * Math.PI);
         tz += -sinA * posDiff.x + cosA * posDiff.z;
+        
+        /*
+        System.out.println(cosA * posDiff.x + sinA * posDiff.z);
+        System.out.println(-sinA * posDiff.x + cosA * posDiff.z);
+        
+        
+        if (leg == 0) {
+            System.out.println(tx);
+            System.out.println(tz);
+            
+            System.exit(0);
+        }
+        */
         
         
         //double rotSinA = Math.sin(chromosomes[C_MOVE_ROTATION][0]);
@@ -310,13 +398,15 @@ public class BetterRobot extends AWalker{
             
         } else {
             setDistance(1 - t);
-            correctT = 1 - t;         
+            correctT = - t;         
+            //correctT = t;
             moveBack(0, t - 0.5);
             moveBack(2, t - 0.5);
             moveBack(4, t - 0.5);
-
+           
             setDistance(-1 + t);
-            correctT = -1 + t;
+            correctT = t;
+            //correctT = -t;
             inverseKinematics(1);
             inverseKinematics(3);
             inverseKinematics(5);

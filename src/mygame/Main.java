@@ -9,6 +9,8 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
@@ -23,7 +25,10 @@ public class Main extends SimpleApplication {
     private Robot robot;
     private AWalker walker;
     private final Node robotOuterNode = new Node();
+    private final Node robotStartNode = new Node();
 
+    private float nextReset = 0;
+    
     /* Main */
     
     public static void main(String[] args) {
@@ -50,6 +55,10 @@ public class Main extends SimpleApplication {
         setDisplayFps(false);
         rootNode.scale(0.2f);
         
+        cam.setLocation(new Vector3f(0,2,5));
+        System.out.println(cam.getRotation());
+        cam.setRotation(cam.getRotation().mult(new Quaternion(new float[] {0.1f,0,0})));
+        
         
         Quad q = new Quad(100, 100);
         Geometry groundGeometry = new Geometry("", q);
@@ -66,7 +75,10 @@ public class Main extends SimpleApplication {
         robot = new Robot((SimpleApplication) this);
 
         robotOuterNode.attachChild(robot.getRobotNode());
-        rootNode.attachChild(robotOuterNode);
+        
+        robotStartNode.attachChild(robotOuterNode);
+        
+        rootNode.attachChild(robotStartNode);
         
         new Thread(() -> {
             Application.launch(Output.class, new String[0]);
@@ -85,6 +97,9 @@ public class Main extends SimpleApplication {
             if (walker == null) {
                 return;
             }
+            
+            nextReset = 1;
+            robotStartNode.setLocalTransform(Transform.IDENTITY);
 
             int number = Output.getInstance().getPopulation().getBestRobots().size() - 1;
             Output.getInstance().choose(number);
@@ -98,8 +113,23 @@ public class Main extends SimpleApplication {
         }
 
         robot.setRotation(walker, sum % 1.);
+        
+        /*
+        if (sum > nextReset) {
+            nextReset += 1;
+            
+            robotOuterNode.setLocalTranslation(1 * (float) walker.getDirection()[0], (float) walker.getStartHeight(), 1 * (float) walker.getDirection()[1]);
+            robotOuterNode.setLocalRotation(new Quaternion(new float[]{0, 1 * (float) walker.getRotationAngle(), 0}));
+            
+            //robotStartNode.getLocalRotation().mult(new Quaternion(new float[]{0, 1 * (float) walker.getRotationAngle(), 0}));
+        }
+        */
+        
         robotOuterNode.setLocalTranslation(sum * (float) walker.getDirection()[0], (float) walker.getStartHeight(), sum * (float) walker.getDirection()[1]);
         robotOuterNode.setLocalRotation(new Quaternion(new float[]{0, sum * (float) walker.getRotationAngle(), 0}));
+        
+        
+        
 
         sum += tpf / 2.;
         if (sum > 2) {
