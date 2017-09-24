@@ -1,16 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fitnesses;
 
 import robots.AWalker;
 
-/**
- *
- * @author Tobia
- */
 public class FHideExtended implements IFitness{
 
     @Override
@@ -36,4 +27,13 @@ public class FHideExtended implements IFitness{
         }
     }
     
+    @Override
+    public String getName() {
+        return "Extended Hide";
+    }
+
+    @Override
+    public String getDescription() {
+        return "3 - highest point in cycle";
+    }
 }

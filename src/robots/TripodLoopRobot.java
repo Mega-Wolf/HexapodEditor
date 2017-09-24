@@ -1,4 +1,3 @@
-//Tripod :[[-1.432821159681283, 4.502035344895974], [-0.40891439891937764, -0.6651818060981322], [2.9375258559642132, 1.7361534800301865], [-1.2600145447558977, 4.392344095316288], [-1.576993487322087, 0.8825759780361142], [2.1821855758332025, 2.1825797407084107], [0.9442307092252811], [0.026254282811909353, 2.068521330609688], [6.685559340073908, 8.0]]	Fitness: 14.685559340073908
 package robots;
 
 import math.Vector3d;
@@ -51,6 +50,11 @@ public class TripodLoopRobot extends AWalker {
     public TripodLoopRobot(double[][] chromosomes) {
         this.chromosomes = chromosomes;
     }
+    
+    public TripodLoopRobot(double[][] chromosomes, boolean[][] mutate) {
+        this.chromosomes = chromosomes;
+        this.chromosomeMutations = mutate;
+    }
 
     /**
      * Constructor for genetical usage. Takes to parents and lets mutation and
@@ -74,10 +78,10 @@ public class TripodLoopRobot extends AWalker {
             chromosomes[c][i] = clamp(0, chromosomes[c][i], 3);
         } else if (c == C_ROTATION) {
             if (i == 0) {
-                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
+                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = clamp(-Math.PI / 2, chromosomes[c][i], Math.PI / 2);
             } else {    // y Wert egal
-                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 2;
+                chromosomes[c][i] += Math.random() * Math.PI / 4 - Math.PI / 8;
                 chromosomes[c][i] = (2 * Math.PI + chromosomes[c][i]) % (2 * Math.PI);
             }
 
@@ -301,10 +305,45 @@ public class TripodLoopRobot extends AWalker {
     public AWalker newInstance() {
         return new TripodLoopRobot(true);
     }
+    
+    @Override
+    public AWalker newInstance(double[][] dna) {
+        return new TripodLoopRobot(dna);
+    }
+    
+    @Override
+    public AWalker newInstance(double[][] dna, boolean[][] mutate) {
+        return new TripodLoopRobot(dna, mutate);
+    }
 
     @Override
     public AWalker newInstance(AWalker parent0, AWalker parent1) {
         return new TripodLoopRobot(parent0, parent1);
+    }
+
+    @Override
+    public String getName() {
+        return "Tripod Robot";
+    }
+
+    @Override
+    public String getDescription() {
+        return "A robot which uses a tripod gait for movement. Can't rotate.";
+    }
+    
+    @Override
+    public String[][] getDNAInfo() {
+        return new String[][] {
+            {"Position - Leg 1"},
+            {"Position - Leg 2"},
+            {"Position - Leg 3"},
+            {"Position - Leg 4"},
+            {"Position - Leg 5"},
+            {"Position - Leg 6"},
+            {"Body Height"},
+            {"Orientation"},
+            {"Movement"},
+        };
     }
 
     @Override
@@ -319,6 +358,17 @@ public class TripodLoopRobot extends AWalker {
             {0},
             {0, 0},
             {0, 0},};
+        
+        chromosomeMutations = new boolean[][]{
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true, true},
+            {true},
+            {true, true},
+            {true, true},};
     }
 
 }

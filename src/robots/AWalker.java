@@ -7,7 +7,7 @@ import fitnesses.IFitness;
 import java.util.Arrays;
 
 /**
- * A robot which is able to walk in any form and is able to be used in a GA
+ * A loopable robot which can be used in a GA
  *
  * @author Tobias
  */
@@ -58,6 +58,7 @@ public abstract class AWalker {
 
     //two dimensional array, so the genes are located in chromosomes
     protected double[][] chromosomes;
+    protected boolean[][] chromosomeMutations;
 
     /* Constructors */
     /**
@@ -77,7 +78,9 @@ public abstract class AWalker {
         if (mutate) {
             for (int c = 0; c < chromosomes.length; c++) {
                 for (int i = 0; i < chromosomes[c].length; i++) {
-                    mutateCritical(c, i);
+                    if (chromosomeMutations[c][i]) {
+                        mutateCritical(c, i);
+                    }
                 }
             }
         }
@@ -91,6 +94,7 @@ public abstract class AWalker {
      */
     public AWalker(AWalker parent0, AWalker parent1) {
         setupChromosomes();
+        chromosomeMutations = parent0.chromosomeMutations;
         for (int c = 0; c < chromosomes.length; c++) {
             System.arraycopy(Math.random() < 0.5 ? parent0.chromosomes[c] : parent1.chromosomes[c], 0, chromosomes[c], 0, parent0.chromosomes[c].length);
         }
@@ -104,11 +108,13 @@ public abstract class AWalker {
     protected void mutate() {
         for (int c = 0; c < chromosomes.length; c++) {
             for (int i = 0; i < chromosomes[c].length; i++) {
-                if (Math.random() < MUTATION_RATE) {
+                if (chromosomeMutations[c][i]) {
                     if (Math.random() < MUTATION_RATE) {
-                        mutateCritical(c, i);
-                    } else {
-                        mutateNormal(c, i);
+                        if (Math.random() < MUTATION_RATE) {
+                            mutateCritical(c, i);
+                        } else {
+                            mutateNormal(c, i);
+                        }
                     }
                 }
             }
@@ -132,7 +138,10 @@ public abstract class AWalker {
         return fitness;
     }
 
-    private void calcPositions() {
+    /**
+     * Calculates the positions of the joints
+     */
+    public void calcPositions() {
         //TODO; mega ugly und uneffektiv; aber immerhin funktioniert es endlich
 
         //könnte man eig einmal berechnen
@@ -439,6 +448,9 @@ public abstract class AWalker {
                     }
                 }
                 break;
+            case 15:
+                //disable chck for the middle, because here are sometimes errors
+                break;
             default:
                 for (int i = 0; i < 6; i++) {
                     if (Math.abs(lastRotation[i] - rotHorizontal[i]) >= 0.1) {
@@ -529,6 +541,10 @@ public abstract class AWalker {
     public abstract void setRotation(double t);
 
     public abstract AWalker newInstance();
+    
+    public abstract AWalker newInstance(double[][] dna);
+    
+    public abstract AWalker newInstance(double[][] dna, boolean[][] mutate);
 
     public abstract AWalker newInstance(AWalker parent0, AWalker parent1);
 
@@ -555,6 +571,20 @@ public abstract class AWalker {
     }
 
     /* Getter */
+    
+    /**
+     * Gets the chromosomes of the robot to show them to a viewer
+     * 
+     * @return the chromosomes of the robot with their genes in them
+     */
+    public double[][] getDNA() {
+        return chromosomes;
+    }
+    
+    public boolean[][] getShallMutate() {
+        return chromosomeMutations;
+    }
+    
     /**
      * Gets the horizontal rotation (rotation around body edges)
      *
@@ -667,6 +697,28 @@ public abstract class AWalker {
      */
     public abstract double getRotationAngle();
 
+    
+    /**
+     * Gets the name of this robot type
+     * 
+     * @return the name of the robot type
+     */
+    public abstract String getName();
+    
+    
+    /**
+     * Gets the description of the robot type
+     * 
+     * @return the description of the robot type
+     */
+    public abstract String getDescription();
+    
+    /**
+     * Gets Descriptions for all the genes
+     * @return 
+     */
+    public abstract String[][] getDNAInfo();
+    
     @Override
     public String toString() {
         return this.getClass() + ":" + Arrays.deepToString(chromosomes) + "\tFitness: " + fitness;
