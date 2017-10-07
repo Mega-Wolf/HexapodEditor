@@ -178,7 +178,7 @@ public class Output extends Application {
             public void run() {
                 for (int i = 0; i < testSize; i++) {
                     //System.out.println(i);
-                    series = seriesArray[testSize];
+                    series = seriesArray[i];
 
                     population = new Population(WALKERS[robotIndex], FITNESSES[fitnessIndex], Collections.synchronizedList(new ArrayList<>()));      
                     population.testGA();

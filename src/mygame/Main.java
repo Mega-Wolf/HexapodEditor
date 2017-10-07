@@ -59,9 +59,9 @@ public class Main extends SimpleApplication {
         setDisplayFps(false);
         rootNode.scale(0.2f);
         
-        cam.setLocation(new Vector3f(0,3,7));
+        cam.setLocation(new Vector3f(0,4,8));
         System.out.println(cam.getRotation());
-        cam.setRotation(cam.getRotation().mult(new Quaternion(new float[] {0.2f,0,0})));
+        cam.setRotation(cam.getRotation().mult(new Quaternion(new float[] {0.3f,0,0})));
         
         
         Quad q = new Quad(100, 100);
